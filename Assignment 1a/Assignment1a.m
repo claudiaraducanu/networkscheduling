@@ -108,7 +108,7 @@ solution_DV = cplex.Solution.x;
 
 %%  Postprocessing
 %Store direct results
-solution_x_ijk = round(reshape(solution_DV(1:1:Nodes*Nodes*K),Nodes,Nodes,K));
+   solution_x_ijk = round(reshape(solution_DV(1:1:Nodes*Nodes*K),Nodes,Nodes,K));
 
 for k = 1:K
     xlswrite(filsol,solution_x_ij',k,'C3:V22')
