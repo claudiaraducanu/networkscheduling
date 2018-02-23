@@ -37,8 +37,7 @@ network.gcap        = digraph(network.data.origin,network.data.dest,...
 network.mcap        = full(sparse(s,t,network.gcap.Edges.Weight,...
                     nodes,nodes));
 
-%% Read file for commodities
-
+%% Read file 
 
                 
 
