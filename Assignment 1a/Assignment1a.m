@@ -11,20 +11,37 @@ warning('off','MATLAB:xlswrite:NoCOMServer')
 
 %%  Determine input
 %   Select input file and sheet
-input        =   [pwd '/Input_AE4424_Ass1P1.xlsx'];
+
+filename     = 'Input_AE4424_Ass1P1.xlsx';
+
+%input        =   [pwd '/Input_AE4424_Ass1P1.xlsx'];
+
 filsol      =   'Solutions.xlsx';
 
-cost        = xlsread(input,1,'D2:D31');
-capa        = xlsread(input,1,'E2:E31');
-quant       = xlsread(input,2,'D2:D41');
+%% Inputs
+% These are the ouputs of the function matrixsetup;
+%     Nodes = set of airports
+%     K     = set of commodities
+%     cost  = Nodes*Nodes matrix of arc costs
+%     capa  = Nodes*Nodes matrix of arc capacities
+%     quant = 1*K row vector of demand
+%     origin = 1*K row vector of each commodity origin
+%     destination = 1*K row vector of each commodity destination
 
-origin      = xlsread(input,1,'D2:D41'); % origin of comodity k
-destination = xlsread(input,1,'D2:D41'); % destination of comodity k
+[Nodes, K, cost , capa , ...
+    origin , destination, quant] = matrixsetup(filename);
+
+% cost        = xlsread(input,1,'D2:D31');
+% capa        = xlsread(input,1,'E2:E31');
+% quant       = xlsread(input,2,'D2:D41');
+
+% origin      = xlsread(input,1,'D2:D41'); % origin of comodity k
+% destination = xlsread(input,1,'D2:D41'); % destination of comodity k
 
 %%  Define formulations
 %   The Sets
-Nodes = 16;     % set of airports     
-K =40;          % set of commodities
+% Nodes = 16;     % set of airports     
+% K =40;          % set of commodities
 
 %%  Initiate CPLEX model
 %   Create model 
