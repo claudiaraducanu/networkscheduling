@@ -62,7 +62,7 @@ cplex.addCols(obj, [], lb, ub, ctype, NameDV);
 
 %%  Constraints
 % 1. Demand Verification (#pax <= demand from i to j)
-a  = zeros(1,K);
+a  = zeros(K);
 for i = 1:Nodes
     for k = 1:K
         for j = 1:Nodes
@@ -73,14 +73,12 @@ for i = 1:Nodes
         end
         if i == origin(k)       % i is element of origin of k
             a(k) = quant(k);
-            C1 = C11-C12 ; 
         elseif i == destination(k)  % i is element of destination of k
-            a(k) = quant(k);
-            C1 = C12-C11 ; 
+            a(k) = -quant(k);
         else
             a(k) = 0;
-            C1 = C11-C12 ;
-        end    
+        end
+        C1 = C11-C12 ;    
         cplex.addRows(a(k), C1, a(k),sprintf('Direct_Demand_Constraint_%d_%d_%d',i,j,k));
     end
 end
@@ -107,16 +105,16 @@ cplex.solve();
 cplex.writeModel([model '.lp']);
 
 %sol.cost = cplex.Solution.objval;
-%solution_DV = cplex.Solution.x;
+solution_DV = cplex.Solution.x;
 
-% %%  Postprocessing
-% %Store direct results
-%    solution_x_ijk = round(reshape(solution_DV(1:1:Nodes*Nodes*K),Nodes,Nodes,K));
-% 
-% for k = 1:K
-%     xlswrite(filsol,solution_x_ij,k,'C3:V22')
-% end
-% 
+%%  Postprocessing
+%Store direct results
+   solution_x_ijk = round(reshape(solution_DV(1:1:Nodes*Nodes*K),Nodes,Nodes,K));
+
+for k = 1:K
+    xlswrite(filsol,solution_x_ij,k,'C3:V22')
+end
+
 
 %end
 
@@ -124,7 +122,7 @@ cplex.writeModel([model '.lp']);
 function out = Xindex(m,n,p)
     Nodes = 16;
     K = 40;
-    out =  (m - 1)*Nodes*K + (n-1)*Nodes + p;  % Function given the variable index for each X(i,j,k) [=(m,n,p)]  
+    out =  (m - 1)*Nodes* + n + (p-1)*Nodes*Nod;  % Function given the variable index for each X(i,j,k) [=(m,n,p)]  
 end
 
 
