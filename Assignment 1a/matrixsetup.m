@@ -1,5 +1,4 @@
-function [nodes, commodities, cost , capacity , ...
-    origin , dest, demand'] = matrixsetup(filename)
+function [nodes, commodities, cost , capacity, origin , dest, demand ] = matrixsetup(filename)
 
     %% Read file for network
    
@@ -44,6 +43,7 @@ function [nodes, commodities, cost , capacity , ...
     [~, cargo.origin]   = xlsread(filename,2,'B2:B41'); % names of origin airport for commodities
     [~, cargo.dest]     = xlsread(filename,2,'C2:C41'); % names of destination airports for commodities
     demand              = xlsread(filename,2,'D2:D41'); % demand for each commodity
+    demand              = transpose(demand);
 
     commodities         = size(cargo.origin,1);
     

@@ -1,21 +1,13 @@
 %%  Initialization
-%addpath('D:Documents\cplex\matlab\x64_win64'); %Luka
-addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Satrio
-%addpath('Users\Luka\Documents\IBM\ILOG\CPLEX_Studio1271'); %Bryan
-clc
-clearvars
-close all
-warning('off','MATLAB:lang:badlyScopedReturnValue')
-warning('off','MATLAB:xlswrite:NoCOMServer')
+% Claudia Raducanu and Luka Van de Sype
+
+addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 
 
 %%  Determine input
 %   Select input file and sheet
 
-filename     = 'Input_AE4424_Ass1P1.xlsx';
-
-%input        =   [pwd '/Input_AE4424_Ass1P1.xlsx'];
-
+inputA        =   [pwd '/Input_AE4424_Ass1P1.xlsx'];
 filsol      =   'Solutions.xlsx';
 
 %% Inputs
@@ -28,20 +20,8 @@ filsol      =   'Solutions.xlsx';
 %     origin = 1*K row vector of each commodity origin
 %     destination = 1*K row vector of each commodity destination
 
-[Nodes, K, cost , capa , ...
-    origin , destination, quant] = matrixsetup(filename);
+[Nodes, K, cost , capa , origin , destination, quant] = matrixsetup(inputA);
 
-% cost        = xlsread(input,1,'D2:D31');
-% capa        = xlsread(input,1,'E2:E31');
-% quant       = xlsread(input,2,'D2:D41');
-
-% origin      = xlsread(input,1,'D2:D41'); % origin of comodity k
-% destination = xlsread(input,1,'D2:D41'); % destination of comodity k
-
-%%  Define formulations
-%   The Sets
-% Nodes = 16;     % set of airports     
-% K =40;          % set of commodities
 
 %%  Initiate CPLEX model
 %   Create model 
@@ -53,9 +33,13 @@ DV                    =  Nodes*Nodes*K;  % Number of Decision Var (xijk)
 
 
 %%  Objective Function
- cost_OF       =   reshape(cost, Nodes*Nodes*K, 1);
+cost_OF       =   reshape(cost, Nodes*Nodes, 1);
 
-obj                     =   [cost_OF];
+% As the cost is not dependent on k, but it should be Nodes*Nodes*K long,
+% each element is repeated K times.
+cost_OF       =   repelem(cost_OF,K);        
+
+obj                     =   cost_OF ;
 lb                      =   zeros(DV, 1);                                 %Lower bounds
 ub                      =   inf(DV, 1);                                   %Upper bounds
 ctype                   =   char(ones(1, (DV)) * ('I'));                  %Variable types 'C'=continuous; 'I'=integer; 'B'=binary
@@ -65,7 +49,7 @@ l = 1;                                      % Array with DV names
 for i = 1:Nodes
     for j = 1:Nodes                     % of the x_{ij}^k variables
         for k = 1:K
-            NameDV (l,:)  = ['X_' num2str(i,'%02d') ',' num2str(j,'%02d') '_' num2str(0,'%02d')];
+            NameDV (l,:)  = ['X_' num2str(i,'%02d') ',' num2str(j,'%02d') '_' num2str(k,'%02d')];
             l = l + 1;
         end
     end
@@ -87,14 +71,14 @@ for i = 1:Nodes
             C11(Xindex(i,j,k)) = 1;
             C12(Xindex(j,i,k)) = 1;
         end
-        if i = origin(k)       % i is element of origin of k
+        if i == origin(k)       % i is element of origin of k
             a(k) = quant(k);
-        elseif i = destination(k)  % i is element of destination of k
+        elseif i == destination(k)  % i is element of destination of k
             a(k) = -quant(k);
         else
             a(k) = 0;
         end
-        C1 = C11-C12    
+        C1 = C11-C12 ;    
         cplex.addRows(a(k), C1, a(k),sprintf('Direct_Demand_Constraint_%d_%d_%d',i,j,k));
     end
 end
@@ -104,9 +88,9 @@ for i = 1:Nodes
     for j = 1:Nodes
         for k = 1:K
         C2 = zeros(1,DV);
-        C2(Xindex) = 1
+        C2(Xindex(i,j,k)) = 1;
         end
-        cplex.addRows(0), C2, capa(i,j),sprintf('Direct_Demand_Constraint_%d_%d_%d',i,j,k));
+        cplex.addRows(0, C2, capa(i,j),sprintf('Direct_Demand_Constraint_%d_%d_%d',i,j,k));
     end
 end
 
@@ -120,7 +104,7 @@ cplex.Param.timelimit.Cur           = 120;         %max time in seconds
 cplex.solve();
 cplex.writeModel([model '.lp']);
 
-sol.profit = cplex.Solution.objval;
+%sol.cost = cplex.Solution.objval;
 solution_DV = cplex.Solution.x;
 
 %%  Postprocessing
@@ -128,7 +112,7 @@ solution_DV = cplex.Solution.x;
    solution_x_ijk = round(reshape(solution_DV(1:1:Nodes*Nodes*K),Nodes,Nodes,K));
 
 for k = 1:K
-    xlswrite(filsol,solution_x_ij',k,'C3:V22')
+    xlswrite(filsol,solution_x_ij,k,'C3:V22')
 end
 
 
