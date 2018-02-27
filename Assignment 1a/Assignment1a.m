@@ -1,7 +1,7 @@
 %%  Initialization
 % Claudia Raducanu and Luka Van de Sype
 
-%addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
+addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 
 
 %%  Determine input
@@ -62,7 +62,6 @@ cplex.addCols(obj, [], lb, ub, ctype, NameDV);
 
 %%  Constraints
 % 1. Demand Verification (#pax <= demand from i to j)
-%a  = zeros(1,K);
 for i = 1:Nodes
     for k = 1:K
         C1 = zeros(1,DV);
@@ -71,16 +70,14 @@ for i = 1:Nodes
             C1(Xindex(j,i,k)) = -1;
         end
         if i == origin(k)       % i is element of origin of k
-            %a(k) = -demand(k);
             cplex.addRows(demand(k), C1, demand(k), ...
-                sprintf('Direct_Demand_Constraint_%d_%d',i,k));
+                sprintf('Quantity_Constraint_%d_%d',i,k));
         elseif i == destination(k)  % i is element of destination of k
-            %a(k) = demand(k);
             cplex.addRows(-demand(k), C1, -demand(k), ...
-                sprintf('Direct_Demand_Constraint_%d_%d',i,k));
+                sprintf('Quantity_Constraint_%d_%d',i,k));
         else
             cplex.addRows(0, C1, 0, ...
-                sprintf('Direct_Demand_Constraint_%d_%d_%d',i,j,k));
+                sprintf('Quantity_Constraint_%d_%d',i,k));
         end    
     end
 end
