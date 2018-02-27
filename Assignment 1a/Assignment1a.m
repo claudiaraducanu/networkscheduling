@@ -118,7 +118,7 @@ cplex.writeModel([model '.lp']);
 function out = Xindex(m,n,p)
     Nodes = 16;
     K = 40;
-    out =  (m - 1)*Nodes*K + (n-1)*Nodes + p;  % Function given the variable index for each X(i,j,k) [=(m,n,p)]  
+    out =  (m - 1)*Nodes*K + (n-1)*K + p;  % Function given the variable index for each X(i,j,k) [=(m,n,p)]  
 end
 
 
