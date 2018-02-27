@@ -1,7 +1,7 @@
 %%  Initialization
 % Claudia Raducanu and Luka Van de Sype
 
-addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
+%addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 
 
 %%  Determine input
@@ -20,7 +20,7 @@ filsol      =   'Solutions.xlsx';
 %     origin = 1*K row vector of each commodity origin
 %     destination = 1*K row vector of each commodity destination
 
-[Nodes, K, cost , capa , origin , destination, quant] = matrixsetup(inputA);
+[Nodes, K, cost , capa , origin , destination, demand] = matrixsetup(inputA);
 
 
 %%  Initiate CPLEX model
@@ -29,7 +29,7 @@ model                   =   'MCF_Model';  % name of model
 cplex                   =   Cplex(model); % define the new model
 cplex.Model.sense       =   'minimize';
 %   Decision variables
-DV                    =  Nodes*Nodes*K;  % Number of Decision Var (xijk)
+DV                      =  Nodes*Nodes*K;  % Number of Decision Var (xijk)
 
 
 %%  Objective Function
@@ -62,42 +62,39 @@ cplex.addCols(obj, [], lb, ub, ctype, NameDV);
 
 %%  Constraints
 % 1. Demand Verification (#pax <= demand from i to j)
-a  = zeros(1,K);
+%a  = zeros(1,K);
 for i = 1:Nodes
     for k = 1:K
+        C1 = zeros(1,DV);
         for j = 1:Nodes
-            C11 = zeros(1,DV);
-            C12 = zeros(1,DV);
-            C11(Xindex(i,j,k)) = 1;
-            C12(Xindex(j,i,k)) = 1;
+            C1(Xindex(i,j,k)) =  1;
+            C1(Xindex(j,i,k)) = -1;
         end
         if i == origin(k)       % i is element of origin of k
-            a(k) = quant(k);
-            C1 = C11-C12 ; 
+            %a(k) = -demand(k);
+            cplex.addRows(demand(k), C1, demand(k), ...
+                sprintf('Direct_Demand_Constraint_%d_%d',i,k));
         elseif i == destination(k)  % i is element of destination of k
-            a(k) = quant(k);
-            C1 = C12-C11 ; 
+            %a(k) = demand(k);
+            cplex.addRows(-demand(k), C1, -demand(k), ...
+                sprintf('Direct_Demand_Constraint_%d_%d',i,k));
         else
-            a(k) = 0;
-            C1 = C11-C12 ;
+            cplex.addRows(0, C1, 0, ...
+                sprintf('Direct_Demand_Constraint_%d_%d_%d',i,j,k));
         end    
-        cplex.addRows(a(k), C1, a(k),sprintf('Direct_Demand_Constraint_%d_%d_%d',i,j,k));
     end
 end
 
 % 2. Capacity constraint
 for i = 1:Nodes
     for j = 1:Nodes
-        for k = 1:K
         C2 = zeros(1,DV);
+        for k = 1:K
         C2(Xindex(i,j,k)) = 1;
         end
-        cplex.addRows(0, C2, capa(i,j),sprintf('Direct_Demand_Constraint_%d_%d_%d',i,j,k));
+        cplex.addRows(0, C2, capa(i,j),sprintf('Capacity_Constraint_%d_%d',i,j));
     end
 end
-
-
-
 
 %%  Execute model
 cplex.Param.mip.limits.nodes.Cur    = 1e+8;        %max number of nodes to be visited (kind of max iterations)
