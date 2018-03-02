@@ -8,8 +8,8 @@ clear all
 %%  Determine input
 %   Select input file and sheet
 
-input     =   'Input_AE4424_Ass1Verification.xlsx';
-%input      =   'Input_AE4424_Ass1P1.xlsx';
+%input     =   'Input_AE4424_Ass1Verification.xlsx';
+input      =   'Input_AE4424_Ass1P1.xlsx';
 
 %% Inputs
 
@@ -102,13 +102,21 @@ end
 
     sol.cost         = cplex.Solution.objval;
     sol.DV           = cplex.Solution.x;
+    %sol.x(:,1)       = find(sol.DV);
+    sol.x            = iindex(find(sol.DV),nw.N,nw.K);
+    
     
 %%  Postprocessing
+% %Store direct results
+%    solution_x_ijk = round(reshape(solution_DV(1:1:Nodes*Nodes*K),Nodes,Nodes,K));
+% 
+% for k = 1:K
+%     xlswrite(filsol,solution_x_ij,k,'C3:V22')
+% end
+% 
 
-    [sol.x(:,1),sol.x(:,2),sol.x(:,3)] =  ...
-        DVindex(find(sol.DV),nw.N,nw.K);
-    sol.x(:,4) = sol.DV(find(sol.DV)); %#ok<FNDSB>
-    
+%end
+
 %% Functions 
 % To return index of decision variables
 
@@ -118,10 +126,12 @@ end
 
 % To return indexing of DV in math model from CPLEX index
 
-function [i,j,k] = DVindex(indx,nd,K)
-    i  = floor((indx-1)/(nd*K))+1;
-    j  = floor(((indx-(i-1)*nd*K)-1)/K)+1;
-    k  = mod(indx,K);
-    mm =  k == 0;
-    k(mm) = K;  % Function given the DV index gives X(i,j,k) 
+function i = iindex(indx,nd,K)
+    i = floor((indx-1)/(nd*K))+1;
+    j = floor(((indx-(i-1)*nd*K)-1)/K)+1;
+    k = mod(indx,K);
+    if k == 0
+        k = K;
+    end  % Function given the DV index gives X(i,j,k)
+    
 end
