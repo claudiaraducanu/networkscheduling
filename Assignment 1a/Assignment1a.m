@@ -1,7 +1,7 @@
 %%  Initialization
 % Claudia Raducanu and Luka Van de Sype
 
-addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
+%addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 
 
 %%  Determine input
