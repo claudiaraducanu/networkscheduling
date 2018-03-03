@@ -24,26 +24,26 @@ inputA      =   [pwd '/Input_AE4424_Ass1P1.xlsx'];
 
 %% Parameters
 %Set of shortest path for commodity k
-Pshort = {}; % P{3,1}(2) is the second step in the path of k=3
+Pk = {}; % P{3,1}(2) is the second step in the path of k=3
  for k = 1:K
-     Pshort{k,1} = shortestpath(costgraph,origin(k),destination(k));
-     numP(k) = numel(Pshort{k,1}); % number of airports used in each path
+     Pk{k,1} = shortestpath(costgraph,origin(k),destination(k));
+     numP(k) = numel(Pk{k,1}); % number of airports used in each path
  end
 
-P = numel(Pshort);
+P = numel(Pk);
 
 % cost of transporting one unit of k on path p
 costp = zeros(k,1) + 1000 ; % set default value: cost=1000
 for k = 1:K
     for n = 1:(numP(k)-1)
         cost_part = zeros(n-1,1);
-        cost_part(n) = cost(Pshort{k,1}(n),Pshort{k,1}(n+1)); 
+        cost_part(n) = cost(Pk{k,1}(n),Pk{k,1}(n+1)); 
     end
-    costp(Pshort{k,1}) = sum(cost_part);
+    costp(Pk{k,1}) = sum(cost_part);
 end
 
 %% Objective of OF
-% cost of transporting total of k on path p
+% premultiplication
 costtotal = costp.*demand';
 
 
