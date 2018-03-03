@@ -1,16 +1,17 @@
-function [nodes, commodities, cost , capacity, origin , dest, demand ] = matrixsetup(filename,undirected)
+function [nodes, commodities, cost , capacity, origin , dest, demand, ...
+            airports ] = matrixsetup(filename,undirected)
 
     %% Read file for network
    
-%     [~, dnetwork.origin]   = xlsread(filename,1,'B2:B31'); % names of departure airports
-%     [~, dnetwork.dest]     = xlsread(filename,1,'C2:C31'); % names of arrival airports
-%     dnetwork.acost         = xlsread(filename,1,'D2:D31'); % cost associated to existing arc
-%     dnetwork.acap          = xlsread(filename,1,'E2:E31'); % cost associated to existing arc
+    [~, dnetwork.origin]   = xlsread(filename,1,'B2:B31'); % names of departure airports
+    [~, dnetwork.dest]     = xlsread(filename,1,'C2:C31'); % names of arrival airports
+    dnetwork.acost         = xlsread(filename,1,'D2:D31'); % cost associated to existing arc
+    dnetwork.acap          = xlsread(filename,1,'E2:E31'); % cost associated to existing arc
 
-    [~, dnetwork.origin]   = xlsread(filename,1,'B2:B8'); % names of departure airports
-    [~, dnetwork.dest]     = xlsread(filename,1,'C2:C8'); % names of arrival airports
-    dnetwork.acost         = xlsread(filename,1,'D2:D8'); % cost associated to existing arc
-    dnetwork.acap          = xlsread(filename,1,'E2:E8'); % cost associated to existing arc
+%     [~, dnetwork.origin]   = xlsread(filename,1,'B2:B8'); % names of departure airports
+%     [~, dnetwork.dest]     = xlsread(filename,1,'C2:C8'); % names of arrival airports
+%     dnetwork.acost         = xlsread(filename,1,'D2:D8'); % cost associated to existing arc
+%     dnetwork.acap          = xlsread(filename,1,'E2:E8'); % cost associated to existing arc
 
     %% Turn graph into undirected graph
     % Since the fight routes are operated daily in both directions.
@@ -53,13 +54,13 @@ function [nodes, commodities, cost , capacity, origin , dest, demand ] = matrixs
 
     %% Read file for commodities
 
-%     [~, cargo.origin]   = xlsread(filename,2,'B2:B41'); % names of origin airport for commodities
-%     [~, cargo.dest]     = xlsread(filename,2,'C2:C41'); % names of destination airports for commodities
-%     demand              = xlsread(filename,2,'D2:D41'); % demand for each commodity
+    [~, cargo.origin]   = xlsread(filename,2,'B2:B41'); % names of origin airport for commodities
+    [~, cargo.dest]     = xlsread(filename,2,'C2:C41'); % names of destination airports for commodities
+    demand              = xlsread(filename,2,'D2:D41'); % demand for each commodity
 
-    [~, cargo.origin]   = xlsread(filename,2,'B2:B5'); % names of origin airport for commodities
-    [~, cargo.dest]     = xlsread(filename,2,'C2:C5'); % names of destination airports for commodities
-    demand              = xlsread(filename,2,'D2:D5'); % demand for each commodity
+%     [~, cargo.origin]   = xlsread(filename,2,'B2:B5'); % names of origin airport for commodities
+%     [~, cargo.dest]     = xlsread(filename,2,'C2:C5'); % names of destination airports for commodities
+%     demand              = xlsread(filename,2,'D2:D5'); % demand for each commodity
 
     demand              = transpose(demand);
 
