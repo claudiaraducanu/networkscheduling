@@ -1,5 +1,5 @@
-function [nodes, commodities, cost , capacity, origin , dest, demand, ...
-            airports ] = matrixsetup(filename)
+function [nodes, commodities, cost , capacity, origin , dest, demand, s, ...
+           t] = matrixsetup(filename)
     %% Read file for network
    
     [~, dnetwork.origin]   = xlsread(filename,1,'B2:B31'); % names of departure airports
@@ -28,7 +28,7 @@ function [nodes, commodities, cost , capacity, origin , dest, demand, ...
                         nodes,nodes));
     indx                = cost == 0;
     cost(indx)          = 1000;
-
+    
     %% Determine O-D pair capacity
 
     network.gcap        = digraph(network.data.origin,network.data.dest,...

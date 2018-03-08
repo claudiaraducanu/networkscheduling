@@ -13,44 +13,53 @@ input      =   [pwd '/Input_AE4424_Ass1P1.xlsx'];
 
 %% Inputs
 
-[Nodes, K, cost, capacity, origin, destination, demand, airports] = ...
+[Nodes, K, cost, capacity, origin, destination, demand,s,t] = ...
     matrixsetup(input);
 
+    A = size(s,1);
+    
 %% Initialization 
 %Parameters
     
     %Set of shortest path for commodity k
     
+    sp.dist = cell(K,1);
+    sp.path = cell(K,1);
+    sp.pred = cell(K,1);
+    
     for k = 1:K
-        [dist{k,1}, path{k,1}, pred{k,1}] = graphshortestpath(sparse(cost),origin(k),destination(k),...
+        [sp.dist{k,1}, sp.path{k,1}, sp.pred{k,1}] = graphshortestpath(sparse(cost),origin(k),destination(k),...
                         'Directed', false);
     end
     
+    sp.arcs   = mat2cell([s t],ones(size(s,1),1));
     
+    % Determine which arcs belong to path of k. 
     
-%     for k = 1:K
-%          p_k_init{k,1} = graphshortestpath(costgraph,origin(k),destination(k));
-%          numP(k) = numel(p_k_init{k,1}); % number of airports used in each path
-%     end
+    for k = 1:K
+        pathlength = size(sp.path{k,1},2);
+        if pathlength > 2 
+            ainp = repelem(sp.path{k,1},2);
+            ainp = ainp(2:end-1);
+            ainp = transpose(reshape(ainp,2,pathlength-1)); 
+            for arc
+        end
+            
+    end
+    
+    %for a = 1:A 
+        indx = sp.path{1,1}(1) ==  s(:,1); 
+        
+        %cell2mat(sp.arcs(:,1))
 
-%P = numel(p_k_init);
-
-% cost of transporting one unit of k on path p
-% costp = zeros(k,1) + 1000 ; % set default value: cost=1000
-% for k = 1:K
-%     for n = 1:(numP(k)-1)
-%         cost_part = zeros(n-1,1);
-%         cost_part(n) = cost(p_k_init{k,1}(n),p_k_init{k,1}(n+1)); 
-%     end
-%     costp(p_k_init{k,1}) = sum(cost_part);
-% end
-
+    %end
 %% Objective of OF
 % cost of transporting total of k on path p
-% costtotal = costp.*demand';
+    
+    DV  = K; % Initial number of decision variables
+    c_p = reshape(transpose(demand).*cell2mat(sp.dist),DV,1);
 
-
-
+  
 
 %% Not yet
 
