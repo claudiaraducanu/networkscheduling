@@ -33,26 +33,31 @@ input      =   [pwd '/Input_AE4424_Ass1P1.xlsx'];
     end
     
     sp.arcs   = mat2cell([s t],ones(size(s,1),1));
+   
+   % If arc belongs to path 
     
-    % Determine which arcs belong to path of k. 
+    d_ij_p     = zeros(K,A);
     
-    for k = 1:K
-        pathlength = size(sp.path{k,1},2);
-        if pathlength > 2 
-            ainp = repelem(sp.path{k,1},2);
-            ainp = ainp(2:end-1);
-            ainp = transpose(reshape(ainp,2,pathlength-1)); 
-            for arc
-        end
-            
-    end
-    
-    %for a = 1:A 
-        indx = sp.path{1,1}(1) ==  s(:,1); 
-        
-        %cell2mat(sp.arcs(:,1))
+     for k=1:K
+         for a = 1:A
+            pathlength = size(sp.path{k,1},2);
+            if pathlength > 2 
+                ainp = repelem(sp.path{k,1},2);
+                ainp = ainp(2:end-1);
+                ainp = transpose(reshape(ainp,2,pathlength-1));
+                for ac = 1:(pathlength-1) 
+                    if sum(ainp(ac,:) == sp.arcs{a,1}) == 2
+                        d_ij_p(k,a)  = 1;
+                    end
+                end
+            else
+                if sum(sp.path{k,1} == sp.arcs{a,1}) == 2
+                     d_ij_p(k,a)  = 1;
+                end
+            end
+         end
+     end 
 
-    %end
 %% Objective of OF
 % cost of transporting total of k on path p
     
