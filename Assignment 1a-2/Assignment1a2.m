@@ -33,29 +33,16 @@ P = zeros(K,1);
  end
 
 % cost of transporting one unit of k on path p
-costp = zeros(k,1) + 1000 ; % set default value: cost=1000
+costp = zeros(k,1) + 1000 ; % set default value: cost=1000   
 for k = 1:K
-    for n = 1:(numP(k)-1)
+    for n = 1:(numP(hk)-1)
         cost_part = zeros(n-1,1);
         cost_part(n) = cost(Pshort{k,1}(n),Pshort{k,1}(n+1)); 
     end
     costp(Pshort{k,1}) = sum(cost_part);
 end
 
-%% Start of WHILE LOOP
 
-% delta: 1 if arc belongs to path, 0 otherwise
-delta = zeros(1,A*K*P);
-for a = 1:A
-    for k = 1:K
-        for p = 1:P(k)
-            if a == p
-                delta = 1;
-            else
-                delta = 0 ;
-        end
-    end
-end
 
 %% Objective of OF
 % cost of transporting total of k on path p
@@ -100,10 +87,9 @@ cplex.addCols(obj, [], lb, ub, ctype, NameDV);
 % 1. Demand Verification (#pax <= demand from i to j)
 for k = 1:K
     C1 = zeros(1,DV);
-    for p = 1:P(k)
-        C1(Findex(k,p)) = 1 ;   
-    end
-    cplex.addRows(1, C1, 1,sprintf('Demand_Verification_%d_%d',k,p));
+        C1(Findex(k)) = 1 ;   
+ 
+    cplex.addRows(1, C1, 1,sprintf('Demand_Verification_%d',k));
 end
 
 % 2. Capacity constraint
