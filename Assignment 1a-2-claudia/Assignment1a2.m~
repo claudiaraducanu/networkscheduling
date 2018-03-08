@@ -21,12 +21,8 @@ input      =   [pwd '/Input_AE4424_Ass1P1.xlsx'];
     
     %Set of shortest path for commodity k
     
-    sp.dist = cell(40,1);
-    sp.path = cell(40,1);
-    sp.pred = cell(40,1);
-    
     for k = 1:K
-        [sp.dist{k,1}, sp.path{k,1}, sp.pred{k,1}] = graphshortestpath(sparse(cost),origin(k),destination(k),...
+        [dist{k,1}, path{k,1}, pred{k,1}] = graphshortestpath(sparse(cost),origin(k),destination(k),...
                         'Directed', false);
     end
     
