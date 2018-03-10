@@ -113,21 +113,35 @@ end
     sol.xname(:,1)  = nodes.Name(sol.x(:,1));
     sol.xname(:,2)  = nodes.Name(sol.x(:,2));
     sol.xname(:,[3 4])  = num2cell(sol.x(:,[3,4]));
-
+    
+    
      for k = 1:nw.K
-        arcs_k   = sol.x(sol.x(:,3) == k,:);     % store arcs used by commodity
-         
-        if size(arcs_k,1) == 1
-            sol.paths{k,1} = nodes.Name(arcs_k(1:2));
-        else
-        % Initiate the path for commodity with the origin and next
-        % airport
-            path_k = arcs_k( arcs_k(:,1) == nw.origin(k),[1 2]);
-        %Determine the number of paths possible based on origin
-            num_path_k = size(path_k,1);
         
-    end
-   
+        arcs_k     = sol.x(sol.x(:,3) == k,1:2);     % store arcs used by commodity
+        pathlength = size(arcs_k,1);3
+        path       = reshape(transpose(arcs_k),1,pathlength*2);
+        
+        idx_o     = find(path == nw.origin(k));
+        idx_d     = find(path == nw.destination(k));
+        
+        path_ord   = zeros(size(path));
+        
+        path_ord(1:2) = path(idx_o:idx_o+1);
+        path_ord(end-1:end) = path(idx_d-1:idx_d);
+        
+       
+        
+
+%         if size(arcs_k,1) == 1
+%             sol.paths{k,1} = nodes.Name(arcs_k(1:2));
+%         else
+%         % Initiate the path for commodity with the origin and next
+%         % airport
+%             path_k = arcs_k( arcs_k(:,1) == nw.origin(k),[1 2]);
+%         %Determine the number of paths possible based on origin
+%             num_path_k = size(path_k,1);
+        
+     end
     
 %% Functions 
 % To return index of decision variables

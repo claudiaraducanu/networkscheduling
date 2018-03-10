@@ -1,6 +1,6 @@
 %%  Initialization
 % Claudia Raducanu and Luka Van de Sype
-addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
+%addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 
 clearvars
 clear all
@@ -8,15 +8,16 @@ clear all
 %%  Determine input
 %   Select input file and sheet
 
-input      =   [pwd '/Input_AE4424_Ass1P1.xlsx'];
+input      =  '/Input_AE4424_Ass1Verification.xlsx';
 %filsol      =   'Solutions.xlsx';
 
 %% Inputs
 
-[Nodes, K, cost, capacity, origin, destination, demand,s,t] = ...
-    matrixsetup(input);
+    [Nodes, K, cost, capacity, origin, destination, demand,s,t] = ...
+    read_arc_v(input);
 
     A = size(s,1);
+    capacity = nonzeros(capacity);
     
 %% Initialization 
 %Parameters
@@ -28,7 +29,7 @@ input      =   [pwd '/Input_AE4424_Ass1P1.xlsx'];
     
     for k = 1:K
         [sp.dist{k,1}, sp.path{k,1}, sp.pred{k,1}] = graphshortestpath(sparse(cost),origin(k),destination(k),...
-                        'Directed', false);
+                        'Directed', true);
     end
     
     sp.arcs   = mat2cell([s t],ones(size(s,1),1));
@@ -59,21 +60,22 @@ input      =   [pwd '/Input_AE4424_Ass1P1.xlsx'];
 
 
 %%  Initiate CPLEX model
-%   Create model 
-model                   =   'MCF_Model';  % name of model
-cplex                   =   Cplex(model); % define the new model
-cplex.Model.sense       =   'minimize';
-%   Decision variables
-DV                      =  K+A;  % Number of Decision Var (xijk)
+    %   Create model 
+    model                 =   'Initial';  % name of model
+    RMP                   =    Cplex(model); % define the new model
+    RMP.Model.sense       =   'minimize';
+
+    %   Decision variables
+    DV                      =  K+A;  % Number of Decision Var (xijk)
 
 %%  Objective Function
         
-c_p                     =   reshape(transpose(demand).*cell2mat(sp.dist),K,1);
-M                       =   ones(A,1)*10000;
-obj                     =   [c_p; M] ;
-lb                      =   zeros(DV, 1);                                 %Lower bounds
-ub                      =   inf(DV, 1);                                   %Upper bounds
-ctype                   =   char(ones(1, (DV)) * ('I'));                  %Variable types 'C'=continuous; 'I'=integer; 'B'=binary
+    c_p                     =   reshape(transpose(demand).*cell2mat(sp.dist),K,1);
+    M                       =   ones(A,1)*1000;
+    obj                     =   [c_p; M] ;
+    lb                      =   zeros(DV, 1);                                 %Lower bounds
+    ub                      =   inf(DV, 1);                                   %Upper bounds
+    ctype                   =   char(ones(1, (DV)) * ('I'));                  %Variable types 'C'=continuous; 'I'=integer; 'B'=binary
 
 l = 1;
 for k = 1:K
@@ -89,53 +91,41 @@ for a = 1:A
     %end
 end 
 % cplex.addCols(obj,A,lb,ub,ctype,name)  http://www-01.ibm.com/support/knowledgecenter/#!/SSSA5P_12.2.0/ilog.odms.cplex.help/Content/Optimization/Documentation/CPLEX/_pubskel/CPLEX1213.html
-cplex.addCols(obj, [], lb, ub, ctype, NameDV);
+    RMP.addCols(obj, [], lb, ub, ctype, NameDV);
 
 %%  Constraints
-% 1. Demand Verification (#pax <= demand from i to j)
-for k = 1:K
-    C1 = zeros(1,DV);
-    C1(Findex(k)) = 1 ;   
-    cplex.addRows(1, C1, 1,sprintf('Demand_Verification_%d',k));
-end
-
-% 2. Capacity constraint
-for a = 1:A
-    C2 = zeros(1,DV);
+% 1. Bundle constraint
     for k = 1:K
-        C2(Findex(k)) = demand(k)*d_ij_p(k,a);  
-        C2(Sindex(a))= - max(0,(demand(k)*d_ij_p(k,a)-capacity(a)));
+        C1 = zeros(1,DV);
+        C1(Findex(k)) = 1;   
+        RMP.addRows(1, C1, 1,sprintf('Bundle_%d',k));
     end
-    cplex.addRows(0, C2, capacity(a),sprintf('Capacity_Constraint_%d',a));
-end
+% 
+% % 2. Capacity constraint
+    for a = 1:A
+        C2 = zeros(1,DV);
+        for k = 1:K
+            C2(Findex(k)) = demand(k)*d_ij_p(k,a);
+        end
+        C2(Sindex(a,K)) = -1; 
+        RMP.addRows(0, C2, capacity(a),sprintf('Capacity_Constraint_%d',a));
+    end
 
 %%  Execute model
-cplex.Param.mip.limits.nodes.Cur    = 1e+8;        %max number of nodes to be visited (kind of max iterations)
-cplex.Param.timelimit.Cur           = 120;         %max time in seconds
-%   Run CPLEX
-cplex.solve();
-cplex.writeModel([model '.lp']);
-
-sol.cost = cplex.Solution.objval;
-solution_DV = cplex.Solution.x;
-
-%%  Postprocessing
-%Store direct results
-%    solution_x_ijk = round(reshape(solution_DV(1:1:Nodes*Nodes*K),Nodes,Nodes,K));
-% 
-% for k = 1:K
-%     xlswrite(filsol,solution_x_ij,k,'C3:V22')
-% end
-
-
-%end
+    RMP.Param.mip.limits.nodes.Cur    = 1e+8;        %max number of nodes to be visited (kind of max iterations)
+    RMP.Param.timelimit.Cur           = 120;         %max time in seconds
+    RMP.Param.solutiontype.Cur        = 2;
+% %   Run CPLEX
+    RMP.solve();
+    RMP.writeModel([model '.lp']);
+    RMP.findprop('Solution').delete
+    
 
 %Function to return index of decision variables
 function out = Findex(k)
     out =  k;  % Function given the variable index for each X(i,j,k) [=(m,n,p)]  
 end
-function out = Sindex(a)
-    K = 40;
+function out = Sindex(a,K)
     out = K + a;  % Function given the variable index for each X(i,j,k) [=(m,n,p)]  
 end
 
