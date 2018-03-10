@@ -34,6 +34,7 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     
     sp.arcs   = mat2cell([s t],ones(size(s,1),1));
    
+    cost    = nonzeros(cost);
    % If arc belongs to path 
     
     d_ij_p     = zeros(K,A);
@@ -71,25 +72,26 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
 %%  Objective Function
         
     c_p                     =   reshape(transpose(demand).*cell2mat(sp.dist),K,1);
-    M                       =   ones(A,1)*1000;
+    M                       =   ones(A,1)*10000;
     obj                     =   [c_p; M] ;
     lb                      =   zeros(DV, 1);                                 %Lower bounds
     ub                      =   inf(DV, 1);                                   %Upper bounds
-    %ctype                   =   char(ones(1, (DV)) * ('I'));                  %Variable types 'C'=continuous; 'I'=integer; 'B'=binary
-
-l = 1;
-for k = 1:K
-    %for p = 1:p(k)
-        NameDV (l,:)  = ['F_' num2str(k,'%02d')];
-        l = l + 1;
-    %end
-end 
-for a = 1:A
-    %for p = 1:p(k)
-        NameDV (l,:)  = ['S_' num2str(a,'%02d')];
-        l = l + 1;
-    %end
-end 
+    ctype                   =   char(ones(1, (DV)) * ('I'));                 
+    
+    
+% % l = 1;
+% % for k = 1:K
+% %     %for p = 1:p(k)
+% %         NameDV (l,:)  = ['F_' num2str(k,'%02d')];
+% %         l = l + 1;
+% %     %end
+% % end 
+% % for a = 1:A
+% %     %for p = 1:p(k)
+% %         NameDV (l,:)  = ['S_' num2str(a,'%02d')];
+% %         l = l + 1;
+% %     %end
+% % end 
 % cplex.addCols(obj,A,lb,ub,ctype,name)  http://www-01.ibm.com/support/knowledgecenter/#!/SSSA5P_12.2.0/ilog.odms.cplex.help/Content/Optimization/Documentation/CPLEX/_pubskel/CPLEX1213.html
     RMP.addCols(obj, [], lb, ub);
 
@@ -119,8 +121,17 @@ end
     RMP.solve();
     RMP.writeModel([model '.lp']);
     
-    pi_ij = RMP.Solution.dual; % dual variables of bundle constraints
-          =  RMP.Solution.x;
+    dual    = RMP.Solution.dual;
+    pi_ij   = dual(K+1:end,1); % dual variables of bundle constraints
+    sigma_k = dual(1:K,1)'./demand;
+    
+    
+    
+    for k=1:K 
+        for a = 1:A
+            demand(k)*(cost(a)-pi_ij(a))*;
+        end
+    end
     
     
     
