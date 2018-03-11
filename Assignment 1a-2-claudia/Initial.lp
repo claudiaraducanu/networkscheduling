@@ -2,8 +2,8 @@
 \Problem name: Initial
 
 Minimize
- obj: 75 x1 + 30 x2 + 70 x3 + 25 x4 + 10000 x5 + 10000 x6 + 10000 x7 + 10000 x8
-      + 10000 x9 + 10000 x10 + 10000 x11
+ obj: 75 x1 + 30 x2 + 70 x3 + 25 x4 + 1000 x5 + 1000 x6 + 1000 x7 + 1000 x8
+      + 1000 x9 + 1000 x10 + 1000 x11
 Subject To
  Commodity_1: x1  = 1
  c2:          x2  = 1
