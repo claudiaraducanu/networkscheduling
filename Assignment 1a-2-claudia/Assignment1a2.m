@@ -37,7 +37,7 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
         [sp.dist{k,1}, sp.path{k,1}, sp.pred{k,1}] = graphshortestpath(sparse(cost),origin(k),destination(k),...
                         'Directed', true);
     end
-
+    
 i = 0;
 %% B: Solve RMP
 while i < 2   
@@ -47,6 +47,8 @@ while i < 2
     disp(['Iteration: ',num2str(i)]);   
     disp('-------------------------------------------------');
     % delta 
+    
+    
     
     d_k_p_ij = cell(K,1);
     
@@ -147,12 +149,12 @@ while i < 2
 %% D: Determine column(s) to add. 
     
     % Determine for which commodity to add path. 
-    col_idx  = find(cell2mat(sp.dist(:,i)) < sigma_k./demand'); 
+    
+    col_idx  = find(cell2mat(sp.dist(:,i+1)) < sigma_k./demand'); 
     
     % Update set
     P             = P + size(col_idx,1); % total number of paths
-    P_k(col_idx') = P_k(col_idx')+1;     % total number of paths for commodity k
-  
+    P_k(col_idx') = P_k(col_idx')+1;     % total number of paths for commodity k    
     
 end
     
