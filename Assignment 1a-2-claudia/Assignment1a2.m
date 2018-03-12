@@ -40,7 +40,7 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
 
 i = 0;
 %% B: Solve RMP
-while i <= 1   
+while i < 2   
     %% Parameters
     i= i+1;
     disp('-------------------------------------------------');
@@ -130,19 +130,7 @@ while i <= 1
     dual    = RMP.Solution.dual;
     pi_ij   = dual(K+1:end,1); % dual variables of bundle constraints (slack)
     sigma_k = dual(1:K,1);     % dual variables of 
-    
-    %  Modify costs at the arcs
-
-    for k=1:K 
-        for a = 1:A
-            for p=1:P_k(k)
-                sumarc(p,a,k) = demand(k)*(cost_arc(a)-pi_ij(a))*d_k_p_ij{k,1}(p,a);
-            end
-        end
-    end
-    
-    arc_cost = find(sum(sumarc,2) <= sigma_k);
-    
+       
     
 %% C: Pricing Problem
   
@@ -150,8 +138,8 @@ while i <= 1
     
     cost       = sparse(s,t,cost_arc,Nodes,Nodes);
     
-    for k = 1:size(arc_cost)
-        [sp.dist{arc_cost(k),i+1}, sp.path{arc_cost(k),i+1}, sp.pred{arc_cost(k),i+1}] = ...
+    for k = 1:K
+        [sp.dist{k,i+1}, sp.path{k,i+1}, sp.pred{k,i+1}] = ...
             graphshortestpath(sparse(cost),origin(k),destination(k),...
                         'Directed', true);
     end
@@ -160,17 +148,6 @@ while i <= 1
     
     % Determine for which commodity to add path. 
     col_idx  = find(cell2mat(sp.dist(:,i)) < sigma_k./demand'); 
-    
-    
-    
-%     for m = 1:size(col_idx,1)
-%         for n = 1:size(arc_cost,1)
-%             if col_idx(m,1) == arc_cost(n,1)
-%                 col_idx(m,1) = 0;
-%             end
-%         end
-%     end
-    
     
     % Update set
     P             = P + size(col_idx,1); % total number of paths
