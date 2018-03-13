@@ -1,135 +1,174 @@
 %%  Initialization
 % Claudia Raducanu and Luka Van de Sype
+%addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 
-addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
-
+clearvars
+clear all
 
 %%  Determine input
 %   Select input file and sheet
 
-inputA      =   [pwd '/Input_AE4424_Ass1P1.xlsx'];
-%filsol      =   'Solutions.xlsx';
+input      =  'Input_AE4424_Ass1Verification.xlsx';
 
 %% Inputs
-% These are the ouputs of the function matrixsetup;
-%     Nodes = set of airports
-%     K     = set of commodities
-%     cost  = Nodes*Nodes matrix of arc costs
-%     capa  = Nodes*Nodes matrix of arc capacities
-%     quant = 1*K row vector of demand
-%     origin = 1*K row vector of each commodity origin
-%     destination = 1*K row vector of each commodity destination
 
-[Nodes, K, cost , capa , origin , destination, demand, costgraph] = matrixsetup(inputA,1);
+    [Nodes, K, cost, capacity, origin, destination, demand,s,t] = ...
+    read_arc_v(input);
 
-%% Parameters
-%Set of shortest path for each commodity k
-Pshort = {}; % P{3,1}(2) is the second step in the path of k=3
-P = zeros(K,1);
- for k = 1:K
-     Pshort{k,1} = shortestpath(costgraph,origin(k),destination(k));
-     numP(k) = numel(Pshort{k,1}); % number of airports used in each path
-     P(k) = 1;
- end
+    A = size(s,1);  % number of arcs
+    
+    % Set: P^k set of all paths for commodity k (for all in K)
+    
+    P   = K;         % All paths available at beginning for all k       
+    P_k = ones(1,K); % Paths for commodity k at beginning  
+    
+    capacity    = nonzeros(capacity); % RHS
+    cost_arc    = nonzeros(cost);  % Cost for each arc
+    
+%% A: Define initial set of columns
 
-% cost of transporting one unit of k on path p
-costp = zeros(k,1) + 1000 ; % set default value: cost=1000   
-for k = 1:K
-    for n = 1:(numP(hk)-1)
-        cost_part = zeros(n-1,1);
-        cost_part(n) = cost(Pshort{k,1}(n),Pshort{k,1}(n+1)); 
-    end
-    costp(Pshort{k,1}) = sum(cost_part);
-end
-
-
-
-%% Objective of OF
-% cost of transporting total of k on path p
-costtotal = costp.*demand';
-%M         = very big M;
-
-%%  Initiate CPLEX model
-%   Create model 
-model                   =   'MCF_Model';  % name of model
-cplex                   =   Cplex(model); % define the new model
-cplex.Model.sense       =   'minimize';
-%   Decision variables
-DV                      =  K*A;  % Number of Decision Var (xijk)
-
-
-%%  Objective Function
-        
-obj                     =   [costtotal; M] ;                              %Cost and the big M method
-lb                      =   zeros(DV, 1);                                 %Lower bounds
-ub                      =   inf(DV, 1);                                   %Upper bounds
-ctype                   =   char(ones(1, (DV)) * ('I'));                  %Variable types 'C'=continuous; 'I'=integer; 'B'=binary
-
-
-l = 1;                          % Array with DV names  
-for k = 1:K
-    for p = 1:p(k)
-        NameDV (l,:)  = ['F_' num2str(p,'%02d')];
-        l = l + 1;
-    end
-end
-for a = 1:A                     % should be for every arc
-        NameDV (l,:)  = ['S_' num2str(p,'%02d')];
-        l = l + 1;
-end
-
-% cplex.addCols(obj,A,lb,ub,ctype,name)  http://www-01.ibm.com/support/knowledgecenter/#!/SSSA5P_12.2.0/ilog.odms.cplex.help/Content/Optimization/Documentation/CPLEX/_pubskel/CPLEX1213.html
-cplex.addCols(obj, [], lb, ub, ctype, NameDV);
-
-
-%%  Constraints
-
-% 1. Demand Verification (#pax <= demand from i to j)
-for k = 1:K
-    C1 = zeros(1,DV);
-        C1(Findex(k)) = 1 ;   
- 
-    cplex.addRows(1, C1, 1,sprintf('Demand_Verification_%d',k));
-end
-
-% 2. Capacity constraint
-for a = 1:A
-    C2 = zeros(1,DV);
+    %Set of shortest path for commodity k
+    sp.dist = cell(P,1);
+    sp.path = cell(P,1);
+    sp.pred = cell(P,1);
+    sp.arcs   = mat2cell([s t],ones(size(s,1),1));
+    
     for k = 1:K
-        for p = 1:P(k)
-            C2(Findex(k,p)) = demand(k)*delta(a,k,p);
-            C2(Sindex(a))= - max(0,(demand(k)*delta(a,k,p)-capa(a)));
-        end
+        [sp.dist{k,1}, sp.path{k,1}, sp.pred{k,1}] = graphshortestpath(sparse(cost),origin(k),destination(k),...
+                        'Directed', true);
     end
-    cplex.addRows(0, C2, capa(a),sprintf('Capacity_Constraint_%d_%d_%d',a,k,p));
+    
+i = 0;
+%% B: Solve RMP
+while i < 2   
+    %% Parameters
+    i= i+1;
+    disp('-------------------------------------------------');
+    disp(['Iteration: ',num2str(i)]);   
+    disp('-------------------------------------------------');
+    % delta 
+    
+    
+    
+    d_k_p_ij = cell(K,1);
+    
+    for k=1:K
+        d_k_p_ij{k,1} = zeros(P_k(k),A);
+        for p = 1:P_k(k)
+            for a = 1:A
+                pathlength = size(sp.path{k,p},2);
+                if pathlength > 2 
+                    ainp = repelem(sp.path{k,p},2);
+                    ainp = ainp(2:end-1);
+                    ainp = transpose(reshape(ainp,2,pathlength-1));
+                    for ac = 1:(pathlength-1) 
+                        if sum(ainp(ac,:) == sp.arcs{a,1}) == 2
+                            d_k_p_ij{k,1}(p,a)  = 1;
+                        end
+                    end
+                else
+                    if sum(sp.path{k,1} == sp.arcs{a,1}) == 2
+                     d_k_p_ij{k,1}(p,a)  = 1;
+                    end
+                end
+            end
+         end
+    end 
+
+
+    %%  Initiate CPLEX model
+        %   Create model 
+        model                 =   'Initial';  % name of model
+        RMP                   =    Cplex(model); % define the new model
+        RMP.Model.sense       =   'minimize';
+
+        %   Decision variables
+        DV                      =  P+A;  % Number of Decision Var (xijk)
+   %% Objective function
+        c_p = [];
+        for k = 1:K
+            for p = 1:P_k(k)
+                c_p       = [c_p ; sp.dist{k,p}*demand(k)];
+            end
+        end
+        M                       =   ones(A,1)*1000;
+        obj                     =   [c_p; M] ;
+        lb                      =   zeros(DV, 1);                                 %Lower bounds
+        ub                      =   inf(DV, 1);                                   %Upper bounds              
+
+        RMP.addCols(obj, [], lb, ub);
+
+    %%  Constraints
+    % 1. Commodity constraint
+        for k = 1:K
+            C1 = zeros(1,DV);
+            for p = 1:P_k(k)
+                C1(Findex(P_k,k,p)) = 1;   
+            end
+            RMP.addRows(1, C1, 1,sprintf('Commodity_%d',k));
+        end
+    % 
+    % 2. Bundle constraint
+        for a = 1:A
+            C2 = zeros(1,DV);
+            for k = 1:K
+                for p = 1:P_k(k)
+                    C2(Findex(P_k,k,p)) = demand(k)*d_k_p_ij{k,1}(p,a);
+                end
+            end
+            C2(Sindex(a,P)) = -1; 
+            RMP.addRows(0, C2, capacity(a),sprintf('Bundle_%d',a));
+        end
+
+    %%  Execute model
+    RMP.Param.mip.limits.nodes.Cur    = 1e+8;        %max number of nodes to be visited (kind of max iterations)
+    RMP.Param.timelimit.Cur           = 120;         %max time in seconds
+ 
+    %   Run CPLEX
+    RMP.solve();
+    RMP.writeModel([model '.lp']);
+    
+    %   Get dual variables
+    dual    = RMP.Solution.dual;
+    pi_ij   = dual(K+1:end,1); % dual variables of bundle constraints (slack)
+    sigma_k = dual(1:K,1);     % dual variables of 
+       
+    
+%% C: Pricing Problem
+  
+    cost_arc     = cost_arc - pi_ij;
+    
+    cost       = sparse(s,t,cost_arc,Nodes,Nodes);
+    
+    for k = 1:K
+        [sp.dist{k,i+1}, sp.path{k,i+1}, sp.pred{k,i+1}] = ...
+            graphshortestpath(sparse(cost),origin(k),destination(k),...
+                        'Directed', true);
+    end
+    
+%% D: Determine column(s) to add. 
+    
+    % Determine for which commodity to add path. 
+    
+    col_idx  = find(cell2mat(sp.dist(:,i+1)) < sigma_k./demand'); 
+    
+    % Update set
+    P             = P + size(col_idx,1); % total number of paths
+    P_k(col_idx') = P_k(col_idx')+1;     % total number of paths for commodity k    
+    
+end
+    
+    %%  Function to return index of decision variables
+function out = Findex(P_k,k,p) 
+    if k == 1 
+        out = p;
+    else
+        out = sum(P_k(1:(k-1))) + p;  
+    end
 end
 
-%%  Execute model
-cplex.Param.mip.limits.nodes.Cur    = 1e+8;        %max number of nodes to be visited (kind of max iterations)
-cplex.Param.timelimit.Cur           = 120;         %max time in seconds
-%   Run CPLEX
-cplex.solve();
-cplex.writeModel([model '.lp']);
-
-sol.cost = cplex.Solution.objval;
-solution_DV = cplex.Solution.x;
-
-%%  Postprocessing
-%Store direct results
-%    solution_x_ijk = round(reshape(solution_DV(1:1:Nodes*Nodes*K),Nodes,Nodes,K));
-% 
-% for k = 1:K
-%     xlswrite(filsol,solution_x_ij,k,'C3:V22')
-% end
-
-
-%end
-
-%Function to return index of decision variables
-function out = Findex(p)
-    Nodes = 16;
-    K = 40;
-    out =  (m - 1)*Nodes*K + (n-1)*K + p;  % Function given the variable index for each X(i,j,k) [=(m,n,p)]  
+function out = Sindex(a,P)
+    out = P + a;  
 end
 
 
