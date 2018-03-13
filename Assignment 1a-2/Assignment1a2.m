@@ -1,6 +1,6 @@
 %%  Initialization
 % Claudia Raducanu and Luka Van de Sype
-%addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
+addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 
 clearvars
 clear all
@@ -31,7 +31,7 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     sp.dist = cell(P,1);
     sp.path = cell(P,1);
     sp.pred = cell(P,1);
-    sp.arcs   = mat2cell([s t],ones(size(s,1),1));
+    sp.arcs = mat2cell([s t],ones(size(s,1),1));
     
     for k = 1:K
         [sp.dist{k,1}, sp.path{k,1}, sp.pred{k,1}] = graphshortestpath(sparse(cost),origin(k),destination(k),...
