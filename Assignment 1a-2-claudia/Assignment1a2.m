@@ -8,12 +8,12 @@ clear all
 %%  Determine input
 %   Select input file and sheet
 
-input      =  'Input_AE4424_Ass1Verification.xlsx';
+input      =  'Input_AE4424_Ass1P1.xlsx';
 
 %% Inputs
 
     [Nodes, K, cost, capacity, origin, destination, demand,s,t] = ...
-    read_arc_v(input);
+    read_arc(input);
 
     A = size(s,1);  % number of arcs
     
@@ -29,18 +29,23 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
 
     %Set of shortest path for commodity k
     sp.dist = cell(P,1);
-    sp.path = cell(P,1);
+    sp.path = cell(K,1);
     sp.pred = cell(P,1);
     sp.arcs   = mat2cell([s t],ones(size(s,1),1));
     
     for k = 1:K
-        [sp.dist{k,1}, sp.path{k,1}, sp.pred{k,1}] = graphshortestpath(sparse(cost),origin(k),destination(k),...
+        [sp.dist{k,1}{P_k(k),1}, sp.path{k,1}{P_k(k),1}] = graphshortestpath(sparse(cost),origin(k),destination(k),...
                         'Directed', true);
     end
+
+    dual_feasibility   = 0; 
+    primal_feasibility = 0; 
+    
+    stop               = 0; 
     
 i = 0;
 %% B: Solve RMP
-while i < 2   
+while i < 2
     %% Parameters
     i= i+1;
     disp('-------------------------------------------------');
@@ -49,16 +54,15 @@ while i < 2
     % delta 
     
     
-    
     d_k_p_ij = cell(K,1);
     
     for k=1:K
         d_k_p_ij{k,1} = zeros(P_k(k),A);
         for p = 1:P_k(k)
             for a = 1:A
-                pathlength = size(sp.path{k,p},2);
+                pathlength = size(sp.path{k,1}{p,1},2);
                 if pathlength > 2 
-                    ainp = repelem(sp.path{k,p},2);
+                    ainp = repelem(sp.path{k,1}{p,1},2);
                     ainp = ainp(2:end-1);
                     ainp = transpose(reshape(ainp,2,pathlength-1));
                     for ac = 1:(pathlength-1) 
@@ -67,7 +71,7 @@ while i < 2
                         end
                     end
                 else
-                    if sum(sp.path{k,1} == sp.arcs{a,1}) == 2
+                    if sum(sp.path{k,1}{p,1} == sp.arcs{a,1}) == 2
                      d_k_p_ij{k,1}(p,a)  = 1;
                     end
                 end
@@ -88,7 +92,7 @@ while i < 2
         c_p = [];
         for k = 1:K
             for p = 1:P_k(k)
-                c_p       = [c_p ; sp.dist{k,p}*demand(k)];
+                c_p       = [c_p ; sp.dist{k,1}{p,1}*demand(k)];
             end
         end
         M                       =   ones(A,1)*1000;
@@ -121,12 +125,18 @@ while i < 2
         end
 
     %%  Execute model
-    RMP.Param.mip.limits.nodes.Cur    = 1e+8;        %max number of nodes to be visited (kind of max iterations)
     RMP.Param.timelimit.Cur           = 120;         %max time in seconds
  
     %   Run CPLEX
     RMP.solve();
     RMP.writeModel([model '.lp']);
+    
+    if RMP.Solution.status == 1 
+        primal_feasibility = 1; 
+    end
+    
+    disp('-------------------------------------------------');
+    disp(['Primal Feasibility: ',num2str(primal_feasibility)]);   
     
     %   Get dual variables
     dual    = RMP.Solution.dual;
@@ -141,7 +151,7 @@ while i < 2
     cost       = sparse(s,t,cost_arc,Nodes,Nodes);
     
     for k = 1:K
-        [sp.dist{k,i+1}, sp.path{k,i+1}, sp.pred{k,i+1}] = ...
+        [sp.dist{k,i+1}, sp.path{k,i+1}] = ...
             graphshortestpath(sparse(cost),origin(k),destination(k),...
                         'Directed', true);
     end
@@ -150,11 +160,29 @@ while i < 2
     
     % Determine for which commodity to add path. 
     
-    col_idx  = find(cell2mat(sp.dist(:,i+1)) < sigma_k./demand'); 
+    col_idx   = find(cell2mat(sp.dist(:,i+1)) < sigma_k./demand'); 
+    
+    
+    if isempty(col_idx) 
+        dual_feasibility = 1; 
+    end
+    
+    disp(['Dual Feasibility: ',num2str(dual_feasibility)]);   
+    
+    for o = 1:size(col_idx,1) 
+        sp.path{col_idx(o),1}{end+1,1} = sp.path{col_idx(o),i+1};
+        sp.dist{col_idx(o),1}{end+1,1} = sp.dist{col_idx(o),i+1};
+    end
     
     % Update set
     P             = P + size(col_idx,1); % total number of paths
     P_k(col_idx') = P_k(col_idx')+1;     % total number of paths for commodity k    
+    
+    stop =  dual_feasibility + primal_feasibility;
+    
+    disp(['Stop: ',num2str(stop)]);   
+    disp('-------------------------------------------------');
+    
     
 end
     
