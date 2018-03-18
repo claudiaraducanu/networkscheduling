@@ -48,7 +48,7 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     
 i = 0;
 %% B: Solve RMP
-while i < 3
+while i < 1
     %% Parameters
     i= i+1;
     disp('-------------------------------------------------');
@@ -82,15 +82,14 @@ while i < 3
          end
     end 
     
-    if 
-        sum = zeros(1,a); 
-        for a = 1:A
-            for k = 1:K
-                for p = 1:P_k(k)
-                    sum(a) = sum(a) + demand(k)*d_k_p_ij{k,1}(p,a)*f_p(Findex(P_k,k,p));
-                end
+    sum = zeros(1,a); 
+    for a = 1:A
+        for k = 1:K
+            for p = 1:P_k(k)
+                sum(a) = sum(a) + demand(k)*d_k_p_ij{k,1}(p,a)*f_p(Findex(P_k,k,p));
             end
         end
+    end
     
     cap_idx = find(sum > capacity');
     S       = size(cap_idx,1); % Number of slack variables in problem. 
@@ -105,7 +104,7 @@ while i < 3
         RMP.Model.sense       =   'minimize';
 
         %   Decision variables
-        DV                      =  P+A;  % Number of Decision Var (xijk)
+        DV                      =  P+S;  % Number of Decision Var (xijk)
    %% Objective function
         c_p = [];
         for k = 1:K
@@ -113,7 +112,7 @@ while i < 3
                 c_p       = [c_p ; sp.dist{k,1}{p,1}*demand(k)];
             end
         end
-        M                       =   ones(A,1)*1000;
+        M                       =   ones(S,1)*1000;
         obj                     =   [c_p; M] ;
         lb                      =   zeros(DV, 1);                                 %Lower bounds
         ub                      =   inf(DV, 1);                                   %Upper bounds         
@@ -138,8 +137,9 @@ while i < 3
                 for p = 1:P_k(k)
                     C2(Findex(P_k,k,p)) = demand(k)*d_k_p_ij{k,1}(p,a);
                 end
-            end 
-            C2(Sindex(a,P)) = cap_log(a); 
+            end
+            if 
+            C2(Sindex(a,P)) = ; 
             RMP.addRows(0, C2, capacity(a),sprintf('Bundle_%d',a));
         end
 
