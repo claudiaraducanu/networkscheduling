@@ -11,8 +11,10 @@ clear all
 input      =  'Input_Example.xlsx';
 
 %% Inputs
-[P, L, fare, recaprate, recap_p, recap_r, demand , capacity, ... 
-           pathflights, flightnrs] = matrixsetup1P2_EXAMPLE(input) ; 
+[P, L, fare, demand , capacity, pathflights, flightnrs] ... 
+            = matrixsetup1P2_EXAMPLE(input) ;
+
+Bpr = xlsread('Bpr_EXAMPLE',1,'A1:H8') ;
 
 iter=0;
 %% B: Solve RMP

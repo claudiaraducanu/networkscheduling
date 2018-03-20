@@ -50,13 +50,19 @@ function [P, L, fare_p, demand , capacity, pathflights, flightnrs] = matrixsetup
     demand       = itinerary.demand;
     capacity     = flight.capacity;
 end
-%     
-%     bptor
-%     brtop
-%     tptor
-%     trtop
-%     
-%     delta?
-%     Q?
+
+%% Write Bpr file
+ptor = zeros(P);
+for p = 1:P
+    for r = 1:P
+        for laa = 1:numel(recap_p)
+            if p == recap_p(laa) & r == recap_r(laa)
+                ptor(p,r) = recaprate;
+            end
+        end
+    end
+end
+
+xlswrite('Bpr.xlsx',ptor)
     
 
