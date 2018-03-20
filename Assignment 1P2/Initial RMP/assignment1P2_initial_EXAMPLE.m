@@ -11,7 +11,7 @@ clear all
 input      =  'Input_Example.xlsx';
 
 %% Inputs
-[P, L, fare_p, demand , capacity, pathflights, flightnrs] = matrixsetup1P2_EXAMPLE(input) ; 
+[P, L, fare_p, demand , capacity, pathflights, flightnrs] = matrixsetup1P2_initial_EXAMPLE(input) ; 
 
 % The binary value: Delta
 delta = cell(P,1); % For each Path all Flights are checked: delta{p,1}(i)
