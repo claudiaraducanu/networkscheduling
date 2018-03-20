@@ -8,12 +8,12 @@ clear all
 %%  Determine input
 %   Select input file and sheet
 
-input      =  'Input_AE4424_Ass1Verification.xlsx';
+input      =  'Input_AE4424_Ass1P1.xlsx';
 
 %% Inputs
 
     [Nodes, K, cost, capacity, origin, destination, demand,s,t] = ...
-    read_arc_v(input);
+    read_arc(input);
 
     A = size(s,1);  % number of arcs
     
@@ -24,7 +24,7 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
    
     
     capacity    = nonzeros(capacity); % RHS
-    cost_arc    = nonzeros(cost);  % Cost for each arc
+    cost_arc    = nonzeros(cost);     % Cost for each arc
     
 %% A: Define initial set of columns
 
@@ -34,10 +34,18 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     sp.pred = cell(P,1);
     sp.arcs   = mat2cell([s t],ones(size(s,1),1));
     
+    
+    
+    
     for k = 1:K
         [sp.dist{k,1}{P_k(k),1}, sp.path{k,1}{P_k(k),1}] = graphshortestpath(cost,origin(k),destination(k),...
                         'Directed', true);
     end
+    
+    GG = 
+    
+    kkk     = shortestpath(GG,origin,destination)
+    
     
     f_p  = ones(K,1);
     
@@ -47,20 +55,25 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     stop               = 0; 
     
 i = 0;
+
+
 %% B: Solve RMP
-while i < 3
+while i < 2
     %% Parameters
+    
+    
     i= i+1;
     disp('-------------------------------------------------');
     disp(['Iteration: ',num2str(i)]);   
     disp('-------------------------------------------------');
+    
+    
     % delta 
     
-    
-    d_k_p_ij = cell(K,1);
+    param.delta = cell(K,1);
     
     for k=1:K
-        d_k_p_ij{k,1} = zeros(P_k(k),A);
+        param.delta{k,1} = zeros(P_k(k),A);
         for p = 1:P_k(k)
             for a = 1:A
                 pathlength = size(sp.path{k,1}{p,1},2);
@@ -70,33 +83,32 @@ while i < 3
                     ainp = transpose(reshape(ainp,2,pathlength-1));
                     for ac = 1:(pathlength-1) 
                         if sum(ainp(ac,:) == sp.arcs{a,1}) == 2
-                            d_k_p_ij{k,1}(p,a)  = 1;
+                            param.delta{k,1}(p,a)  = 1;
                         end
                     end
                 else
                     if sum(sp.path{k,1}{p,1} == sp.arcs{a,1}) == 2
-                     d_k_p_ij{k,1}(p,a)  = 1;
+                     param.delta{k,1}(p,a)  = 1;
                     end
                 end
             end
          end
     end 
     
-    if 
-        sum = zeros(1,a); 
+    if i == 1
+        transport = zeros(1,a); 
+        
         for a = 1:A
             for k = 1:K
                 for p = 1:P_k(k)
-                    sum(a) = sum(a) + demand(k)*d_k_p_ij{k,1}(p,a)*f_p(Findex(P_k,k,p));
+                    transport(a) = transport(a) + demand(k)*param.delta{k,1}(p,a);
                 end
             end
         end
-    
-    cap_idx = find(sum > capacity');
-    S       = size(cap_idx,1); % Number of slack variables in problem. 
-    cap_log = double(sum > capacity');
-    cap_log(cap_idx) = -1; 
-    
+        
+        cap_idx = find(transport > capacity');
+        S       = size(cap_idx,2); % Number of slack variables in problem. 
+    end
     
     %%  Initiate CPLEX model
         %   Create model 
@@ -105,21 +117,22 @@ while i < 3
         RMP.Model.sense       =   'minimize';
 
         %   Decision variables
-        DV                      =  P+A;  % Number of Decision Var (xijk)
+        DV                      =  P+S;  % Number of Decision Var (xijk)
    %% Objective function
-        c_p = [];
+   
+        obj.c_p = [];
         for k = 1:K
             for p = 1:P_k(k)
-                c_p       = [c_p ; sp.dist{k,1}{p,1}*demand(k)];
+                obj.c_p       = [obj.c_p ; sp.dist{k,1}{p,1}*demand(k)];
             end
         end
-        M                       =   ones(A,1)*1000;
-        obj                     =   [c_p; M] ;
-        lb                      =   zeros(DV, 1);                                 %Lower bounds
-        ub                      =   inf(DV, 1);                                   %Upper bounds         
+        obj.M                      =   ones(S,1)*1000;
+        obj.o                      =   [obj.c_p; obj.M] ;
+        obj.lb                     =   zeros(DV, 1);                                 %Lower bounds
+        obj.ub                     =   inf(DV, 1);                                   %Upper bounds         
         
 
-        RMP.addCols(obj, [], lb, ub);
+        RMP.addCols(obj.o, [], obj.lb, obj.ub);
 
     %%  Constraints
     % 1. Commodity constraint
@@ -128,7 +141,7 @@ while i < 3
             for p = 1:P_k(k)
                 C1(Findex(P_k,k,p)) = 1;   
             end
-            RMP.addRows(1, C1, 1,sprintf('Commodity_%d',k));
+            RMP.addRows(1, C1, 1);
         end
     % 
     % 2. Bundle constraint
@@ -136,15 +149,17 @@ while i < 3
             C2 = zeros(1,DV);
             for k = 1:K
                 for p = 1:P_k(k)
-                    C2(Findex(P_k,k,p)) = demand(k)*d_k_p_ij{k,1}(p,a);
+                    C2(Findex(P_k,k,p)) = demand(k)*param.delta{k,1}(p,a);
                 end
             end 
-            C2(Sindex(a,P)) = cap_log(a); 
-            RMP.addRows(0, C2, capacity(a),sprintf('Bundle_%d',a));
+            if cap_idx == a 
+                C2(end) = -1; 
+            end
+            RMP.addRows(0, C2, capacity(a));
         end
 
     %%  Execute model
-    RMP.Param.timelimit.Cur           = 120;         %max time in seconds
+    %RMP.Param.timelimit.Cur           = 120;         %max time in seconds
  
     %   Run CPLEX
     RMP.solve();
@@ -159,7 +174,7 @@ while i < 3
     
     %   Get dual variables
     primal  = RMP.Solution.x;
-    f_p     = primal(1:P,1);
+    %f_p     = primal(1:P,1);
     
     
     dual    = RMP.Solution.dual;
@@ -208,7 +223,7 @@ while i < 3
     
     
 end
-    
+   
     %%  Function to return index of decision variables
 function out = Findex(P_k,k,p) 
     if k == 1 
@@ -216,10 +231,6 @@ function out = Findex(P_k,k,p)
     else
         out = sum(P_k(1:(k-1))) + p;  
     end
-end
-
-function out = Sindex(a,P)
-    out = P + a;  
 end
 
 
