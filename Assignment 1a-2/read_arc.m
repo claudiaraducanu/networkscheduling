@@ -1,21 +1,19 @@
 function [nodes, commodities, cost , capacity, origin , dest, demand, s, ...
-           t] = matrixsetup(filename)
+           t] = read_arc(filename)
     %% Read file for network
-   
-    [~, dnetwork.origin]   = xlsread(filename,1,'B2:B31'); % names of departure airports
-    [~, dnetwork.dest]     = xlsread(filename,1,'C2:C31'); % names of arrival airports
-    dnetwork.acost         = xlsread(filename,1,'D2:D31'); % cost associated to existing arc
-    dnetwork.acap          = xlsread(filename,1,'E2:E31'); % cost associated to existing arc
-
-
-    %% Turn graph into undirected graph
-    % Since the fight routes are operated daily in both directions.
+    
+    [~, net.data.origin]   = xlsread(filename,1,'B2:B31'); % names of departure airports
+    [~, net.data.dest]     = xlsread(filename,1,'C2:C31'); % names of arrival airports
+    network.data.cost         = xlsread(filename,1,'D2:D31'); % cost associated to existing arc
+    network.data.cap          = xlsread(filename,1,'E2:E31'); % cost associated to existing arc
    
     
-    network.data.origin        = [ dnetwork.origin; dnetwork.dest];   % destinations are also origins
-    network.data.dest          = [ dnetwork.dest;   dnetwork.origin]; % origins are also destinations
-    network.data.cost          = [ dnetwork.acost; dnetwork.acost];  
-    network.data.cap           = [ dnetwork.acap; dnetwork.acap];
+    
+    network.data.origin   = [ net.data.origin ; net.data.dest];  % names of departure airports
+    network.data.dest     = [ net.data.dest ; net.data.origin]; % names of arrival airports
+    network.data.cost     = [ network.data.cost; network.data.cost]; % cost associated to existing arc
+    network.data.cap      = [ network.data.cap ; network.data.cap]; % cost associated to existing arc
+   
     
     %% Determine O-D pair cost
 
@@ -23,19 +21,19 @@ function [nodes, commodities, cost , capacity, origin , dest, demand, s, ...
                             network.data.cost);
     network.gcost.Nodes.Number = (1:size(network.gcost.Nodes.Name,1))'; 
     nodes               = numnodes(network.gcost);
-    [s,t]               = findedge(network.gcost);
-    cost                = full(sparse(s,t,network.gcost.Edges.Weight,...
-                        nodes,nodes));
-    indx                = cost == 0;
-    cost(indx)          = 1000;
     
+    %% 
+    [s,t]               = findedge(network.gcost);
+    cost                = sparse(s,t,network.gcost.Edges.Weight,...
+                        nodes,nodes);
+
     %% Determine O-D pair capacity
 
     network.gcap        = digraph(network.data.origin,network.data.dest,...
                             network.data.cap);
     [s,t]               = findedge(network.gcap);
-    capacity            = full(sparse(s,t,network.gcap.Edges.Weight,...
-                        nodes,nodes));
+    capacity            = sparse(s,t,network.gcap.Edges.Weight,...
+                        nodes,nodes);
 
     %% Airport names and numbers
     airports =  network.gcost.Nodes;               
@@ -45,6 +43,7 @@ function [nodes, commodities, cost , capacity, origin , dest, demand, s, ...
     [~, cargo.origin]   = xlsread(filename,2,'B2:B41'); % names of origin airport for commodities
     [~, cargo.dest]     = xlsread(filename,2,'C2:C41'); % names of destination airports for commodities
     demand              = xlsread(filename,2,'D2:D41'); % demand for each commodity
+
 
     demand              = transpose(demand);
 

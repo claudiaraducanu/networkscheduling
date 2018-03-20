@@ -11,8 +11,19 @@ clear all
 input      =  'Input_Example.xlsx';
 
 %% Inputs
-[P, L, fare_p, demand , capacity, pathflights, flightnrs] = matrixsetup1P2_EXAMPLE(input) ; 
+[P, L, fare, recaprate, recap_p, recap_r, demand , capacity, ... 
+           pathflights, flightnrs] = matrixsetup1P2_EXAMPLE(input) ; 
 
+iter=0;
+%% B: Solve RMP
+while iter < 2
+    %% Parameters
+    
+    iter = iter+1;
+    disp('-------------------------------------------------');
+    disp(['Iteration: ',num2str(iter)]);   
+    disp('-------------------------------------------------');
+    
 % The binary value: Delta
 delta = cell(P,1); % For each Path all Flights are checked: delta{p,1}(i)
 for p = 1:P
@@ -34,6 +45,11 @@ for i = 1:L
     Q(i) = sum(a);
 end
 
+if iter==1
+   fare_r = zeros(P,1);
+   recaprate = ones(P,1);
+end
+
   %%  Initiate CPLEX model
         %   Create model 
         model                 =   'Initial';  % name of model
@@ -43,8 +59,9 @@ end
         %   Decision variables
         DV                      =  P;  % Number of Decision Var (xijk)
    %% Objective function
+   
 
-        obj                     =   [fare_p] ;
+        obj                     =   [fare] ;
         lb                      =   zeros(DV, 1);                                 %Lower bounds
         ub                      =   inf(DV, 1);                                   %Upper bounds              
 
@@ -68,6 +85,8 @@ end
     %   Run CPLEX
     RMP.solve();
     RMP.writeModel([model '.lp']);
+    
+end
     
         %%  Function to return index of decision variables
 function out = Tindex(p) 

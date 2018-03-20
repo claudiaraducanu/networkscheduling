@@ -8,12 +8,12 @@ clear all
 %%  Determine input
 %   Select input file and sheet
 
-input      =  'Input_AE4424_Ass1P1.xlsx';
+input      =  'Input_AE4424_Ass1Verification.xlsx';
 
 %% Inputs
 
     [Nodes, K, cost, capacity, origin, destination, demand,s,t] = ...
-    read_arc(input);
+    read_arc_v(input);
 
     A = size(s,1);  % number of arcs
     
@@ -23,7 +23,7 @@ input      =  'Input_AE4424_Ass1P1.xlsx';
     P_k = ones(1,K); % Paths for commodity k at beginning  
    
     
-    capacity    = nonzeros(capacity); % RHS
+    paramcapacity    = nonzeros(capacity); % RHS
     cost_arc    = nonzeros(cost);     % Cost for each arc
     
 %% A: Define initial set of columns
@@ -34,15 +34,10 @@ input      =  'Input_AE4424_Ass1P1.xlsx';
     sp.pred = cell(P,1);
     sp.arcs   = mat2cell([s t],ones(size(s,1),1));
     
-    
-    
-    
     for k = 1:K
         [sp.dist{k,1}{P_k(k),1}, sp.path{k,1}{P_k(k),1}] = graphshortestpath(cost,origin(k),destination(k),...
                         'Directed', true);
     end
-    
-        
     
     f_p  = ones(K,1);
     
@@ -52,8 +47,6 @@ input      =  'Input_AE4424_Ass1P1.xlsx';
     stop               = 0; 
     
 i = 0;
-
-
 %% B: Solve RMP
 while i < 2
     %% Parameters
@@ -94,7 +87,6 @@ while i < 2
     
     if i == 1
         transport = zeros(1,a); 
-        
         for a = 1:A
             for k = 1:K
                 for p = 1:P_k(k)
@@ -104,7 +96,7 @@ while i < 2
         end
         
         cap_idx = find(transport > capacity');
-        S       = size(cap_idx,2); % Number of slack variables in problem. 
+        S       = size(cap_idx,1); % Number of slack variables in problem. 
     end
     
     %%  Initiate CPLEX model
