@@ -2,8 +2,8 @@
 % Claudia Raducanu and Luka Van de Sype
 addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 
-%clearvars
-%clear all
+% clearvars
+% clear all
 
 %%  Determine input
 %   Select input file and sheet
@@ -14,18 +14,10 @@ input      =  'Input_Example.xlsx';
 [P, L, fare, demand , capacity, pathflights, flightnrs] ... 
             = matrixsetup1P2_EXAMPLE(input) ;
 
-Bpr = xlsread('Bpr_EXAMPLE',1,'A1:H8') ;
+Bpr = xlsread('Bpr_EXAMPLE',1,'A1:I8') ;
 
-iter=0;
-%% B: Solve RMP
-while iter < 2
-    %% Parameters
-    
-    iter = iter+1;
-    disp('-------------------------------------------------');
-    disp(['Iteration: ',num2str(iter)]);   
-    disp('-------------------------------------------------');
-    
+col = 1;
+
 % The binary value: Delta
 delta = cell(P,1); % For each Path all Flights are checked: delta{p,1}(i)
 for p = 1:P
@@ -47,21 +39,32 @@ for i = 1:L
     Q(i) = sum(a);
 end
 
-fare_r = fare ;
+% adding the ficticious fare and element
+fare_r = [0;fare] ; % adding the ficticious recapture fare
+R = P +1;
 
-% First iteration: Initialisation
-if iter==1
-   fare_r = zeros(P,1);
-   recaprate = ones(P,1);
-end
 
-% Calculating the cost
-cost = zeros(P,P);
+costfull = zeros(P,R);      % full cost matrix
 for p = 1:P
-    for r = 1:P
-        cost(p,r) = fare(p) - Bpr(p,r)*fare_r(r);
+    for r = 1:R
+        costfull(p,r) = fare(p) - Bpr(p,r)*fare_r(r);
     end
 end
+
+iter=0;
+%% B: Solve RMP
+ while iter < 2
+    %% Parameters
+    
+    iter = iter+1;
+    disp('-------------------------------------------------');
+    disp(['Iteration: ',num2str(iter)]);   
+    disp('-------------------------------------------------');
+
+    
+cost = costfull(:,col);                % select only costs you need
+cost = reshape(cost,numel(col)*P,1);   % reshape for cplex
+
 
   %%  Initiate CPLEX model
         %   Create model 
@@ -70,9 +73,9 @@ end
         RMP.Model.sense       =   'minimize';
 
         %   Decision variables
-        DV                      =  P*P;  % Number of Decision Var (xijk)
+        DV                      =  numel(col)*P;
+
    %% Objective function
-   cost = reshape(cost,P*P,1);
 
         obj                     =   cost ;
         lb                      =   zeros(DV, 1);                                 %Lower bounds
@@ -86,10 +89,14 @@ end
             C11 = zeros(1,DV);
             C12 = zeros(1,DV);
             for p = 1:P
-                for r = 1:P
-                    if delta{p,1}(i) ~= 0 && p ~= r
+                for r = 1:col
+                    if delta{p,1}(i) ~= 0 && p ~= r-1
                         C11(Tindex(p,r)) = 1;
-                        C12(Tindex(r,p)) = - Bpr(r,p);
+                        if r == 1
+                            C12 = 0;
+                        else
+                            C12(Tindex(r-1,p+1)) = Bpr(r-1,p+1); % as the first column is 'ficticious'
+                        end
                     end
                 end
             end
@@ -97,7 +104,15 @@ end
             RMP.addRows(Q(i)-capacity(i), C1, inf, sprintf('Capacity_%d',i));
         end
         
-    % 2. 
+%     % 2. Demand constraint
+%         for p = 1:P
+%             C2 = zeros(1,DV);
+%             for r = 1:R
+%                 C2(Tindex(r,p)) = 1;
+%             end
+%             RMP.addRows(0, C2, demand(p), sprintf('Demand_%d',p));
+%         end            
+%         
        %%  Execute model
 % %     RMP.Param.mip.limits.nodes.Cur    = 1e+8;        %max number of nodes to be visited (kind of max iterations)
 % %     RMP.Param.timelimit.Cur           = 120;         %max time in seconds
@@ -116,18 +131,32 @@ end
     %   Get dual variables
     primal  = RMP.Solution.x;   
     dual    = RMP.Solution.dual;
-    
+    pi   = dual; % dual variables of capacity constraints (slack)
+%     sigma_k = dual(1:L,1);     % dual variables of demand constraint
+    sigma   = zeros(P,1);
         %% Pricing Problem
+    x = zeros(P,P);
+    R = P;
     for p = 1:P
-        for r = 1:P
-            if fare(p) - pi_i - Bpr(p,r)*(fare(r) - pi_j) - sigma(p) < 0
-                %path is added
-            end               
+        for r = 1:R
+            pi_j = 0;
+            pi_i = 0;
+            
+            for i = 1:L
+            pi_i = pi_i + pi(i)*delta{p,1}(i);
+            pi_j = pi_j + pi(i)*delta{r,1}(i);
+                
+            end
+            if (fare(p) - pi_i) - (Bpr(p,r+1)*(fare(r) - pi_j )) - sigma(p) < 0
+                col = [col, r];
+            end
         end
     end
     
     
-end
+    
+    
+ end
     
         %%  Function to return index of decision variables
 function out = Tindex(p,r)

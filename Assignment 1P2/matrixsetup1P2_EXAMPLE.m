@@ -2,7 +2,7 @@
 function [P, L, fare, demand, capacity, pathflights, flightnrs] ... 
           = matrixsetup1P2_EXAMPLE(filename)  
 
- %  filename = 'Input_Example.xlsx';
+ %filename = 'Input_Example.xlsx';
    
    % All dependend on P (itineraries)
     itinerary.flightnr          = xlsread(filename,2,'F2:G9');   % flight numbers both legs
@@ -34,9 +34,26 @@ function [P, L, fare, demand, capacity, pathflights, flightnrs] ...
     demand       = itinerary.demand;
     capacity     = flight.capacity;
 end
-    
+
+% ma = zeros(3);
+% ma2 = zeros(3);
+% 
+% l =1;
+% for x=1:3
+%     for y = 1:3
+%         ma(x,y) = 1 ;
+%     end
+% end
+% 
+% for y=1:3
+%     for x = 1:3
+%         ma(y,x) = -1 ;
+%         l = l+1;
+%     end
+% end
 
 
 
-    
+
+
 
