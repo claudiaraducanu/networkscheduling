@@ -49,7 +49,7 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     
     c.ineq = [ sp.slack colslack];
     
-    c.eq   = eye(P,P);
+    c.eq   = [ eye(P,P) zeros(P,1)];
     
     %% Iteration stop conditions
     
@@ -92,36 +92,24 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
         end 
         
         obj.M                      =   ones(S,1)*1000;
-        obj.o                      =   [obj.c_p; obj.M] ;
-        obj.lb                     =   zeros(DV, 1);                                 %Lower bounds
-        obj.ub                     =   inf(DV, 1);                                   %Upper bounds         
+        obj.o                      =   [obj.c_p; obj.M];
         
-
-        RMP.addCols(obj.o, [], obj.lb, obj.ub);
+        RMP.addCols(obj.o);
 
     %%  Constraints
     % 1. Commodity constraint
-        for k = 1:K
-            C1 = 
+        for p = 1:P
+            C1 = c.eq(p,:);
             RMP.addRows(1, C1, 1);
         end
- 
-%     % 2. Bundle constraint
+      % 2. Bundle constraint
         for a = 1:A
-            C2 = zeros(1,DV);
-            for k = 1:K
-                for p = 1:P_k(k)
-                    C2(Findex(P_k,k,p)) = sp.delta{k,1}(p,a);
-                end
-            end 
-            if a == 6 
-                C2(end) = -1; 
-            end
+            C2 = c.ineq(a,:);
             RMP.addRows(0, C2, capacity(a));
         end
 
     %%  Execute model
-    %RMP.Param.timelimit.Cur           = 120;         %max time in seconds
+    RMP.Param.timelimit.Cur           = 120;         %max time in seconds
  
     %   Run CPLEX
     RMP.solve();
@@ -186,9 +174,15 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
 %     
 % end
 %    
+%%  Function to return index of decision variables
 
-
-
+function out = Findex(P_k,k,p) 
+    if k == 1 
+        out = p;
+    else
+        out = sum(P_k(1:(k-1))) + p;  
+    end
+end
 
 
 

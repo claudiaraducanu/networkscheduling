@@ -97,17 +97,18 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
         RMP.addCols(obj.o);
 
     %%  Constraints
-    % 1. Commodity constraint
+    
+     %   1. Commodity constraint
         for p = 1:P
             C1 = c.eq(p,:);
             RMP.addRows(1, C1, 1);
         end
- 
-%     % 2. Bundle constraint
-        for a = 1:A
-            C2 = c.ineq(a,:);
-            RMP.addRows(0, C2, capacity(a));
-        end
+
+    % 2. Bundle constraint
+    for a = 1:A
+        C2 = c.ineq(a,:);
+        RMP.addRows(0, C2, capacity(a,1));
+    end
 
     %%  Execute model
     RMP.Param.timelimit.Cur           = 120;         %max time in seconds
