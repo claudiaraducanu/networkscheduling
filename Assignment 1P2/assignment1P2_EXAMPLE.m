@@ -49,11 +49,13 @@ end
 
 fare_r = fare ;
 
+% First iteration: Initialisation
 if iter==1
    fare_r = zeros(P,1);
    recaprate = ones(P,1);
 end
 
+% Calculating the cost
 cost = zeros(P,P);
 for p = 1:P
     for r = 1:P
@@ -94,6 +96,8 @@ end
             C1 = C11 - C12;
             RMP.addRows(Q(i)-capacity(i), C1, inf, sprintf('Capacity_%d',i));
         end
+        
+    % 2. 
        %%  Execute model
 % %     RMP.Param.mip.limits.nodes.Cur    = 1e+8;        %max number of nodes to be visited (kind of max iterations)
 % %     RMP.Param.timelimit.Cur           = 120;         %max time in seconds
