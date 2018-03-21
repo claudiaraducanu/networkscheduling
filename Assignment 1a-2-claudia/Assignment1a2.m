@@ -8,22 +8,29 @@ clear all
 %%  Determine input
 %   Select input file and sheet
 
-%     cost   = [ 5 6 7 5 1000];
-%     c.ineq = [ 15 0 0 0 0; 0 5 0 0 0 ; 0 0 10 0 0 ; 15 0 0 0 0 ; ...
-%                0  0 0 0 0; 0 5 10 5 -1; 0 0 0 0 0];
+%     cost   = [ 75 40 30 70 70 25 55 1000];
+%     c.ineq = [ 15 5 0 0 0 0 0 0; ...
+%                 0 0 5 0 0 0 0 0 ; ...
+%                 0 0 0 0 10 0 0 0; ...
+%                 15 5 0 10 0 0 0 0 ; ...
+%                 0  0 0 0 0  0 5 0; ...
+%                 0  0 5 0 10 5 0 -1 ; ...
+%                 0  5 0 10 0 0 5 0];
 %     capacity = [ 20; 10; 10; 20; 40; 10; 30];
-%     c.eq     = [ 1 0 0 0 0; 0 1 0 0 0; 0 0 1 0 0; 0 0 0 1 0];
+%     c.eq     = [ 1 0 0 0 0 0 0 0 ; ...
+%                  0 1 1 0 0 0 0 0 ; ...
+%                  0 0 0 1 1 0 0 0 ; ...
+%                  0 0 0 0 0 1 1 0];
 %     eq       = [ 1; 1; 1 ; 1];
 %     
-%     [x, fval] = linprog(cost,c.ineq,capacity,c.eq,eq)
-
-input      =  'Input_AE4424_Ass1Verification.xlsx';
-%input      =  'Input_AE4424_Ass1P1.xlsx';
+     
+%input      =  'Input_AE4424_Ass1Verification.xlsx';
+input      =  'Input_AE4424_Ass1P1.xlsx';
 
 %% Inputs
 
     [nodes, K, arcs, origin, destination, demand,od(:,1),od(:,2),capacity] = ...
-    read_arc_v(input);
+    read_arc(input);
 
     A = size(od,1);  % number of arcs
     
@@ -40,8 +47,8 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     sp.delta = zeros(A,P);
     
     for k = 1:K
-        sp.path{k,1}{P_k(k),1} = shortestpath(arcs,origin(k),destination(k));
-        eidx = findedge(arcs, sp.path{k,1}{P_k(k),1}(1:end-1), sp.path{k,1}{P_k(k),1}(2:end));
+        sp.path{k,1}  = shortestpath(arcs,origin(k),destination(k));
+        eidx = findedge(arcs, sp.path{k,1}(1:end-1), sp.path{k,1}(2:end));
         sp.delta(eidx,k)                    = demand(k);
     end
     
@@ -57,6 +64,20 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     c.ineq = [ sp.delta sp.colslack];
     c.eq   = [ eye(P,P) zeros(P,S)];
     
+    
+    obj.c_p = [];
+
+    for k = 1:K
+        for p = 1:P_k(k)
+            eidx = findedge(arcs, sp.path{k,p}(1:end-1), sp.path{k,p}(2:end));
+            sp.dist{k,1}(p,1) = sum(arcs.Edges.Weight(eidx));
+        end
+        obj.c_p = [ obj.c_p ; demand(k).*sp.dist{k,1}(1:end,1) ];
+    end 
+    
+    obj.M                      =   ones(S,1)*1000;
+    obj.o                      =   [obj.c_p; obj.M];
+    
     %% Iteration stop conditions
     
     dual_feasibility   = 0; 
@@ -67,7 +88,7 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     i = 0;
    
 %% B: Solve RMP
-%while i < 4
+while i < 7
     %% Parameters
     
     i= i+1;
@@ -86,27 +107,14 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
         
         DV                      =  P+S;  % Number of Decision Var (xijk)
     %% Objective function
-   
-        obj.c_p = [];
-        
-        for k = 1:K
-            for p = 1:P_k(k)
-                eidx = findedge(arcs, sp.path{k,1}{p,1}(1:end-1), sp.path{k,1}{p,1}(2:end));
-                sp.dist{k,1}(p,1) = sum(arcs.Edges.Weight(eidx));
-            end
-            obj.c_p = [ obj.c_p ; demand(k).*sp.dist{k,1}(1:end,1) ];
-        end 
-        
-        obj.M                      =   ones(S,1)*1000;
-        obj.o                      =   [obj.c_p; obj.M];
-        
+ 
         RMP.addCols(obj.o);
 
     %%  Constraints
     
      %   1. Commodity constraint
-    for p = 1:P
-        C1 = c.eq(p,:);
+    for k= 1:K
+        C1 = c.eq(k,:);
         RMP.addRows(1, C1, 1);
     end
 
@@ -145,6 +153,7 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     
     sp.coliq       = zeros(A,K);
     
+    
     for k = 1:K
         sp.path{k,i+1}      = shortestpath(pricing_arc,origin(k),destination(k));
         eidx                = findedge(pricing_arc, sp.path{k,i+1}(1:end-1), sp.path{k,i+1}(2:end));             
@@ -157,33 +166,35 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     % Determine for which commodity to add path. 
     
     col_idx   = find(cell2mat(sp.dist(:,i+1)) < sigma_k./demand'); 
-     
+    
+%     for j = 1:size(col_idx)
+%         cell2mat(sp.path(col_idx(j,1),i))
+%         cell2mat(sp.path(col_idx(j,1),i+1)) % == cell2mat(sp.path(col_idx,i+1))
+%     end
+    
     P             = P + size(col_idx,1); % total number of paths
     P_k(col_idx') = P_k(col_idx')+1;     % total number of paths for commodity k  
     
+    
     c.ineq = [c.ineq sp.coliq(:,col_idx)]; 
     
-%     if isempty(col_idx) 
-%         dual_feasibility = 1; 
-%     end
-%     
-%     disp(['Dual Feasibility: ',num2str(dual_feasibility)]);   
-%     
-%     for o = 1:size(col_idx,1) 
-%         sp.path{col_idx(o),1}{end+1,1} = sp.path{col_idx(o),i+1};
-%         sp.dist{col_idx(o),1}{end+1,1} = sp.dist{col_idx(o),i+1};
-%     end
-%     
-%     % Update set
+    sp.coleq      = c.eq(:,col_idx);
+    
+    c.eq   = [ c.eq sp.coleq];
+    
+    if isempty(col_idx) 
+        dual_feasibility = 1; 
+    end
   
-%     
-%     stop =  dual_feasibility + primal_feasibility;
-%     
-%     disp(['Stop: ',num2str(stop)]);   
-%     disp('-------------------------------------------------');
-%     
-%     
-% end
+    obj.o = [ obj.o ; demand(col_idx)'.*cell2mat(sp.dist(col_idx,i+1))];
+    
+    stop =  dual_feasibility + primal_feasibility;
+    
+    disp(['Stop: ',num2str(stop)]);   
+    disp('-------------------------------------------------');
+    
+    
+end
 %    
 
 
