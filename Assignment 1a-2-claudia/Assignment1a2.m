@@ -8,14 +8,24 @@ clear all
 %%  Determine input
 %   Select input file and sheet
 
+%     cost   = [ 5 6 7 5 1000];
+%     c.ineq = [ 15 0 0 0 0; 0 5 0 0 0 ; 0 0 10 0 0 ; 15 0 0 0 0 ; ...
+%                0  0 0 0 0; 0 5 10 5 -1; 0 0 0 0 0];
+%     capacity = [ 20; 10; 10; 20; 40; 10; 30];
+%     c.eq     = [ 1 0 0 0 0; 0 1 0 0 0; 0 0 1 0 0; 0 0 0 1 0];
+%     eq       = [ 1; 1; 1 ; 1];
+%     
+%     [x, fval] = linprog(cost,c.ineq,capacity,c.eq,eq)
+
 input      =  'Input_AE4424_Ass1Verification.xlsx';
+%input      =  'Input_AE4424_Ass1P1.xlsx';
 
 %% Inputs
 
-    [nodes, K, arcs, origin, destination, demand,slack(:,1),slack(:,2),capacity] = ...
+    [nodes, K, arcs, origin, destination, demand,od(:,1),od(:,2),capacity] = ...
     read_arc_v(input);
 
-    A = size(slack,1);  % number of arcs
+    A = size(od,1);  % number of arcs
     
     % Set: P^k set of all paths for commodity k (for all in K)
     
@@ -27,29 +37,25 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     %Set of shortest path for commodity k
     sp.path = cell(K,1);
     sp.dist = cell(K,1);
-    sp.delta = cell(K,1);
-    sp.slack = zeros(A,P);
+    sp.delta = zeros(A,P);
     
     for k = 1:K
         sp.path{k,1}{P_k(k),1} = shortestpath(arcs,origin(k),destination(k));
         eidx = findedge(arcs, sp.path{k,1}{P_k(k),1}(1:end-1), sp.path{k,1}{P_k(k),1}(2:end));
-        sp.delta{k,1}                       = zeros(P_k(k),A); 
-        sp.delta{k,1}(P_k(k),eidx)          = demand(k);
-        sp.slack(eidx,k)                    = demand(k);
+        sp.delta(eidx,k)                    = demand(k);
     end
     
     
-    slack_idx                       = find(sum(sp.slack,2) > capacity);
-    S                               = size(slack_idx,1);   
-    colslack                        = zeros(A,S);
+    slack_idx                          = find(sum(sp.delta,2) > capacity);
+    S                                  = size(slack_idx,1);   
+    sp.colslack                        = zeros(A,S);
     
     for s = 1:S
-        colslack(slack_idx(s),s) = -1;
+        sp.colslack(slack_idx(s),s) = -1;
     end
     
-    c.ineq = [ sp.slack colslack];
-    
-    c.eq   = [ eye(P,P) zeros(P,1)];
+    c.ineq = [ sp.delta sp.colslack];
+    c.eq   = [ eye(P,P) zeros(P,S)];
     
     %% Iteration stop conditions
     
@@ -59,7 +65,7 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     stop               = 0; 
     
     i = 0;
-
+   
 %% B: Solve RMP
 %while i < 4
     %% Parameters
@@ -88,7 +94,7 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
                 eidx = findedge(arcs, sp.path{k,1}{p,1}(1:end-1), sp.path{k,1}{p,1}(2:end));
                 sp.dist{k,1}(p,1) = sum(arcs.Edges.Weight(eidx));
             end
-            obj.c_p = [ obj.c_p ; sp.dist{k,1}(1:end,1) ];
+            obj.c_p = [ obj.c_p ; demand(k).*sp.dist{k,1}(1:end,1) ];
         end 
         
         obj.M                      =   ones(S,1)*1000;
@@ -99,10 +105,10 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     %%  Constraints
     
      %   1. Commodity constraint
-        for p = 1:P
-            C1 = c.eq(p,:);
-            RMP.addRows(1, C1, 1);
-        end
+    for p = 1:P
+        C1 = c.eq(p,:);
+        RMP.addRows(1, C1, 1);
+    end
 
     % 2. Bundle constraint
     for a = 1:A
@@ -126,33 +132,37 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
     
     %   Get dual variables
     primal  = RMP.Solution.x;
-    %f_p     = primal(1:P,1);
     
     
     dual    = RMP.Solution.dual;
     pi_ij   = dual(K+1:end,1); % dual variables of bundle constraints (slack)
     sigma_k = dual(1:K,1);     % dual variables of 
-%        
-%     
-% %% C: Pricing Problem
-%   
-%     cost_arc     = cost_arc - pi_ij;
-%     
-%     cost       = sparse(s,t,cost_arc,Nodes,Nodes);
-%     
-%     for k = 1:K
-%         [sp.dist{k,i+1}, sp.path{k,i+1}] = ...
-%             graphshortestpath(sparse(cost),origin(k),destination(k),...
-%                         'Directed', true);
-%     end
-%     
-% %% D: Determine column(s) to add. 
-%     
-%     % Determine for which commodity to add path. 
-%     
-%     col_idx   = find(cell2mat(sp.dist(:,i+1)) < sigma_k./demand'); 
-%     
-%     
+    
+ %% C: Pricing Problem
+  
+    pricing_arc  = arcs; 
+    pricing_arc.Edges.Weight = pricing_arc.Edges.Weight - pi_ij;
+    
+    sp.coliq       = zeros(A,K);
+    
+    for k = 1:K
+        sp.path{k,i+1}      = shortestpath(pricing_arc,origin(k),destination(k));
+        eidx                = findedge(pricing_arc, sp.path{k,i+1}(1:end-1), sp.path{k,i+1}(2:end));             
+        sp.dist{k,i+1}      = sum(arcs.Edges.Weight(eidx));
+        sp.coliq(eidx,k)      = demand(k);
+    end
+    
+%% D: Determine column(s) to add. 
+    
+    % Determine for which commodity to add path. 
+    
+    col_idx   = find(cell2mat(sp.dist(:,i+1)) < sigma_k./demand'); 
+     
+    P             = P + size(col_idx,1); % total number of paths
+    P_k(col_idx') = P_k(col_idx')+1;     % total number of paths for commodity k  
+    
+    c.ineq = [c.ineq sp.coliq(:,col_idx)]; 
+    
 %     if isempty(col_idx) 
 %         dual_feasibility = 1; 
 %     end
@@ -165,8 +175,7 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
 %     end
 %     
 %     % Update set
-%     P             = P + size(col_idx,1); % total number of paths
-%     P_k(col_idx') = P_k(col_idx')+1;     % total number of paths for commodity k    
+  
 %     
 %     stop =  dual_feasibility + primal_feasibility;
 %     
@@ -176,15 +185,6 @@ input      =  'Input_AE4424_Ass1Verification.xlsx';
 %     
 % end
 %    
-%%  Function to return index of decision variables
-
-function out = Findex(P_k,k,p) 
-    if k == 1 
-        out = p;
-    else
-        out = sum(P_k(1:(k-1))) + p;  
-    end
-end
 
 
 
