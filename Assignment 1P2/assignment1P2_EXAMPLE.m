@@ -1,22 +1,29 @@
-%%  Initialization
+%  Initialization
 % Claudia Raducanu and Luka Van de Sype
 addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 
 % clearvars
 % clear all
 
-%%  Determine input
-%   Select input file and sheet
+%  Determine input
+%  Select input file and sheet
 
 input      =  'Input_Example.xlsx';
 
-%% Inputs
+% Inputs
 [P, L, fare, demand , capacity, pathflights, flightnrs] ... 
             = matrixsetup1P2_EXAMPLE(input) ;
 
 Bpr = xlsread('Bpr_EXAMPLE',1,'A1:I8') ;
 
-col = 1;
+Rcol = 1;
+Pcol = 1:P;
+col = zeros(P,2);
+for r = Rcol
+    for p = Pcol
+        col(p,:) = [p r];
+    end
+end
 
 % The binary value: Delta
 delta = cell(P,1); % For each Path all Flights are checked: delta{p,1}(i)
@@ -53,17 +60,18 @@ end
 
 iter=0;
 %% B: Solve RMP
- while iter < 2
+ while iter < 2 
     %% Parameters
     
     iter = iter+1;
     disp('-------------------------------------------------');
     disp(['Iteration: ',num2str(iter)]);   
     disp('-------------------------------------------------');
-
     
-cost = costfull(:,col);                % select only costs you need
-cost = reshape(cost,numel(col)*P,1);   % reshape for cplex
+cost = zeros(numel(col(:,1)),1);
+for p = 1:numel(col(:,1))    
+    cost(p) = costfull(col(p,1),col(p,2));                % select only costs you need
+end
 
 
   %%  Initiate CPLEX model
@@ -73,7 +81,7 @@ cost = reshape(cost,numel(col)*P,1);   % reshape for cplex
         RMP.Model.sense       =   'minimize';
 
         %   Decision variables
-        DV                      =  numel(col)*P;
+        DV                      =  numel(col(:,1));
 
    %% Objective function
 
@@ -84,22 +92,47 @@ cost = reshape(cost,numel(col)*P,1);   % reshape for cplex
         RMP.addCols(obj, [], lb, ub);
         
    %%  Constraints
+%     % 1. Capacity constraint
+%         for i = 1:L
+%             C11 = zeros(1,DV);
+%             C12 = zeros(1,DV);
+%             for p = 1:P
+%                 for r = 1:col
+%                     if delta{p,1}(i) ~= 0 && p ~= r-1
+%                         C11(Tindex(p,r)) = 1;
+%                         if r == 1
+%                             C12 = 0;
+%                         else
+%                             C12(Tindex(r-1,p+1)) = Bpr(r-1,p+1); % as the first column is 'ficticious'
+%                         end
+%                     end
+%                 end
+%             end
+%             C1 = C11 - C12;
+%             RMP.addRows(Q(i)-capacity(i), C1, inf, sprintf('Capacity_%d',i));
+%         end
+%                 if delta{col(pr,1),1}(i) ~= 0 && col(pr,1) ~= col(pr,2)-1
+%                     C11(Tindex(col(pr,1),col(pr,2))) = 1;
+%                     if col(pr,2) ~= 1
+%                         C12(Tindex(col(pr,2)-1,col(pr,1)+1)) = 1 ;%Bpr(col(pr,2)-1,col(pr,1)+1); % as the first column is 'ficticious'
+%                     end
+
+col2 = [col(:,2)-1,col(:,1)+1];
     % 1. Capacity constraint
         for i = 1:L
             C11 = zeros(1,DV);
             C12 = zeros(1,DV);
-            for p = 1:P
-                for r = 1:col
-                    if delta{p,1}(i) ~= 0 && p ~= r-1
-                        C11(Tindex(p,r)) = 1;
-                        if r == 1
-                            C12 = 0;
-                        else
-                            C12(Tindex(r-1,p+1)) = Bpr(r-1,p+1); % as the first column is 'ficticious'
+            C1  = zeros(1,DV);
+            for pr = 1:DV
+                if delta{col(pr,1),1}(i) ~= 0 && col(pr,1) ~= col(pr,2)-1
+                    C11(Tindex(col(pr,:))) = 1;
+                    for aa = 1:DV
+                        if ismember(col2(pr,1), col(aa,1)) && ismember(col2(pr,2), col(aa,2)) %col(pr,2) ~= 1
+                            C12(Tindex(col2(pr))) = Bpr(col2(pr,1),col(pr,2)); % as the first column is 'ficticious'
                         end
                     end
                 end
-            end
+             end
             C1 = C11 - C12;
             RMP.addRows(Q(i)-capacity(i), C1, inf, sprintf('Capacity_%d',i));
         end
@@ -148,7 +181,8 @@ cost = reshape(cost,numel(col)*P,1);   % reshape for cplex
                 
             end
             if (fare(p) - pi_i) - (Bpr(p,r+1)*(fare(r) - pi_j )) - sigma(p) < 0
-                col = [col, r];
+                PR  = [p r+1];
+                col = [col; PR];
             end
         end
     end
@@ -159,9 +193,8 @@ cost = reshape(cost,numel(col)*P,1);   % reshape for cplex
  end
     
         %%  Function to return index of decision variables
-function out = Tindex(p,r)
-        P=8;
-        out = P*(r-1) + p;
+function out = Tindex(p)
+        out = p;
 end
     
     
