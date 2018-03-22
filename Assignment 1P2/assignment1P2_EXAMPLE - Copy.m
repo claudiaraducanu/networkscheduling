@@ -1,12 +1,12 @@
 %  Initialization
 % Claudia Raducanu and Luka Van de Sype
-addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luk
+addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
+
 % clearvars
 % clear all
+
 %  Determine input
 %  Select input file and sheet
-
-%% START
 
 input      =  'Input_Example.xlsx';
 
@@ -16,7 +16,7 @@ input      =  'Input_Example.xlsx';
 
 Bpr = xlsread('Bpr_EXAMPLE',1,'A1:I8') ;
 
-Rcol = 9;
+Rcol = 1;
 Pcol = 1:P;
 col = zeros(P,2);
 for r = Rcol
@@ -47,7 +47,7 @@ for i = 1:L
 end
 
 % adding the ficticious fare and element
-fare_r = [fare;0] ; % adding the ficticious recapture fare
+fare_r = [0;fare] ; % adding the ficticious recapture fare
 R = P +1;
 
 
@@ -92,19 +92,47 @@ end
         RMP.addCols(obj, [], lb, ub);
         
    %%  Constraints
-col2 = [col(:,2),col(:,1)];
+%     % 1. Capacity constraint
+%         for i = 1:L
+%             C11 = zeros(1,DV);
+%             C12 = zeros(1,DV);
+%             for p = 1:P
+%                 for r = 1:col
+%                     if delta{p,1}(i) ~= 0 && p ~= r-1
+%                         C11(Tindex(p,r)) = 1;
+%                         if r == 1
+%                             C12 = 0;
+%                         else
+%                             C12(Tindex(r-1,p+1)) = Bpr(r-1,p+1); % as the first column is 'ficticious'
+%                         end
+%                     end
+%                 end
+%             end
+%             C1 = C11 - C12;
+%             RMP.addRows(Q(i)-capacity(i), C1, inf, sprintf('Capacity_%d',i));
+%         end
+%                 if delta{col(pr,1),1}(i) ~= 0 && col(pr,1) ~= col(pr,2)-1
+%                     C11(Tindex(col(pr,1),col(pr,2))) = 1;
+%                     if col(pr,2) ~= 1
+%                         C12(Tindex(col(pr,2)-1,col(pr,1)+1)) = 1 ;%Bpr(col(pr,2)-1,col(pr,1)+1); % as the first column is 'ficticious'
+%                     end
+
+col2 = [col(:,2)-1,col(:,1)+1];
     % 1. Capacity constraint
         for i = 1:L
             C11 = zeros(1,DV);
             C12 = zeros(1,DV);
+            C1  = zeros(1,DV);
             for pr = 1:DV
-                if delta{col(pr,1),1}(i) ~= 0 
-                    C11(Tindex(pr)) = 1;
-                    if ismember(col(pr,2), col(:,1))
-                        C12(Tindex(pr)) = Bpr(col(pr,1),col(pr,2)); 
-                    end
+                if delta{col(pr,1),1}(i) ~= 0 && col(pr,1) ~= col(pr,2)-1
+                    C11(Tindex(col(pr,:))) = 1;
+                    %for aa = 1:DV
+                        if ismember(col2(pr,1), col(:,1))% && ismember(col2(pr,2), col(aa,2)) %col(pr,2) ~= 1
+                            C12(Tindex(col2(pr))) = Bpr(col2(pr,1),col(pr,2)); % as the first column is 'ficticious'
+                        end
+                    %end
                 end
-            end
+             end
             C1 = C11 - C12;
             RMP.addRows(Q(i)-capacity(i), C1, inf, sprintf('Capacity_%d',i));
         end
@@ -146,12 +174,14 @@ col2 = [col(:,2),col(:,1)];
         for r = 1:R
             pi_j = 0;
             pi_i = 0;
+            
             for i = 1:L
-                pi_i = pi_i + pi(i)*delta{p,1}(i);
-                pi_j = pi_j + pi(i)*delta{r,1}(i);    
+            pi_i = pi_i + pi(i)*delta{p,1}(i);
+            pi_j = pi_j + pi(i)*delta{r,1}(i);
+                
             end
-            if (fare(p) - pi_i) - (Bpr(p,r)*(fare(r) - pi_j )) - sigma(p) < 0
-                PR  = [p r];
+            if (fare(p) - pi_i) - (Bpr(p,r+1)*(fare(r) - pi_j )) - sigma(p) < 0
+                PR  = [p r+1];
                 col = [col; PR];
             end
         end
