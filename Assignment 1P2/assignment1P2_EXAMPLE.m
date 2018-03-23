@@ -104,7 +104,6 @@ end
         RMP.addCols(obj, [], lb, ub);
         
    %%  Constraints
-col2 = [col(:,2),col(:,1)];
     % 1. Capacity constraint
         for i = 1:L
             C11 = zeros(1,DV);
@@ -123,15 +122,16 @@ col2 = [col(:,2),col(:,1)];
         
         
         
-%     % 2. Demand constraint
-%         for p = 1:P
-%             C2 = zeros(1,DV);
-%             for r = 1:R
-%                 C2(Tindex(r,p)) = 1;
-%             end
-%             RMP.addRows(0, C2, demand(p), sprintf('Demand_%d',p));
-%         end            
-%         
+    % 2. Demand constraint
+        for pr = 1:DV
+            C2 = zeros(1,DV);
+            X = find(col(:,1)==pr);
+            for i = X
+                C2(Tindex(pr)) = 1;
+            end
+            RMP.addRows(0, C2, demand(col(pr,1)), sprintf('Demand_%d',p));
+        end            
+        
        %%  Execute model
 % %     RMP.Param.mip.limits.nodes.Cur    = 1e+8;        %max number of nodes to be visited (kind of max iterations)
 % %     RMP.Param.timelimit.Cur           = 120;         %max time in seconds
