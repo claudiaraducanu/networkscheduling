@@ -94,11 +94,40 @@ end
 
 %   Get solution
     sol.cost         = cplex.Solution.objval;
-    sol.DV           = cplex.Solution.x;
       
 %%  Postprocessing
     
-    sol.DV
+    sol.DV   = reshape(cplex.Solution.x,nw.K,nw.A);
+    sol.path = cell(nw.K,1);
+    nw.origin = network.Nodes.Name(nw.origin);
+    
+    for k = 1:nw.K
+        sol.path{k,1} = find(sol.DV(k,:));
+        sol.path{k,2} = table2cell(network.Edges(sol.path{k,1},1));
+        
+        for i = 1:size(sol.path{k,1},2)
+            if strcmp(sol.path{k,2}{i,1}{1,1},nw.origin(k,1)) == 1
+                sol.path{k,3} = sol.path{k,2}{i,1};
+            end
+        end
+        
+        pathlength = size(sol.path{k,1},2); % Path length in terms of arcs
+        
+        
+        if pathlength > 1
+            i = 1; 
+            while i < (pathlength+1)
+                for j = 1:pathlength
+                    if strcmp(sol.path{k,2}{j,1}{1,1},sol.path{k,3}{1,end}) == 1
+                        sol.path{k,3}{1,end+1} = sol.path{k,2}{j,1}{1,2};
+                    end
+                end
+                i = i+1;
+            end
+        end
+%         
+     end
+    
     
     
 %% Functions 
