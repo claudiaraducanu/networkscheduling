@@ -92,13 +92,14 @@ end
         ub                      =   inf(DV, 1);                                   %Upper bounds             
         
         
-        l = 1;                                      % Array with DV names
-        for p = 1:numel(col(:,1))
-            for r = 1:numel(col(:,2))                     % of the x_{ij}^k variables
-                NameDV (l,:)  = ['T_' num2str(p,'%02d') ',' num2str(r,'%02d')];
-                l = l + 1;
-            end
-        end
+%         l = 1;                                      % Array with DV names
+%         for p = 1:numel(col(:,1))
+%             for r = 1:numel(col(:,2))                     % of the x_{ij}^k variables
+%                 NameDV (l,:)  = ['T_' num2str(p,'%02d') ',' num2str(r,'%02d')];
+%                 l = l + 1;
+%             end
+%         end
+       % q = [NameDV,char(ones((DV),1) * ('=')),num2str(cplex.Solution.x,'%02d')];
 
         RMP.addCols(obj, [], lb, ub);
         
@@ -110,10 +111,10 @@ col2 = [col(:,2),col(:,1)];
             C12 = zeros(1,DV);
             for pr = 1:DV
                 if delta{col(pr,1),1}(i) ~= 0 
-                    C11(Tindex(col(pr,1),col(pr,2)) )= 1;
+                    C11(Tindex(pr) )= 1;
                 end
                 if delta{col(pr,2),1}(i) ~= 0 && ismember(col(pr,2), col(:,1))
-                    C12(Tindex(col(pr,1),col(pr,2))) = Bpr(col(pr,1),col(pr,2)); 
+                    C12(Tindex(pr)) = Bpr(col(pr,1),col(pr,2)); 
                 end
             end
             C1 = C11 - C12;
@@ -177,11 +178,14 @@ col2 = [col(:,2),col(:,1)];
     
         %%  Function to return index of decision variables
 
-    function out = Tindex(p, r)
-        Nodes = 9;
-        out =  (p - 1) * Nodes + r;  % Function given the variable index for each X(i,j) [=(m,n)]  
-              
-    end    
+%     function out = Tindex(p, r)
+%         Nodes = 9;
+%         out =  (p - 1) * Nodes + r;  % Function given the variable index for each X(i,j) [=(m,n)]  
+%               
+%     end  
+function out = Tindex(p)
+        out = p;
+end
     
     
     
