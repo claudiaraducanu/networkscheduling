@@ -35,23 +35,6 @@ function [P, L, fare, demand, capacity, pathflights, flightnrs] ...
     capacity     = flight.capacity;
 end
 
-% ma = zeros(3);
-% ma2 = zeros(3);
-% 
-% l =1;
-% for x=1:3
-%     for y = 1:3
-%         ma(x,y) = 1 ;
-%     end
-% end
-% 
-% for y=1:3
-%     for x = 1:3
-%         ma(y,x) = -1 ;
-%         l = l+1;
-%     end
-% end
-
 
 
 

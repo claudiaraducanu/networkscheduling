@@ -36,6 +36,8 @@ for p = 1:P
     end
 end
 
+delta{9,1} = zeros(L,1);
+
 % The daily unconstrained demand on flight(i): Q
 Q = zeros(L,1);
 for i = 1:L
@@ -76,7 +78,7 @@ end
 
   %%  Initiate CPLEX model
         %   Create model 
-        model                 =   'Initial';  % name of model
+        model                 =   'Initial_example';  % name of model
         RMP                   =    Cplex(model); % define the new model
         RMP.Model.sense       =   'minimize';
 
@@ -87,7 +89,16 @@ end
 
         obj                     =   cost ;
         lb                      =   zeros(DV, 1);                                 %Lower bounds
-        ub                      =   inf(DV, 1);                                   %Upper bounds              
+        ub                      =   inf(DV, 1);                                   %Upper bounds             
+        
+        
+        l = 1;                                      % Array with DV names
+        for p = 1:numel(col(:,1))
+            for r = 1:numel(col(:,2))                     % of the x_{ij}^k variables
+                NameDV (l,:)  = ['T_' num2str(p,'%02d') ',' num2str(r,'%02d')];
+                l = l + 1;
+            end
+        end
 
         RMP.addCols(obj, [], lb, ub);
         
@@ -99,15 +110,17 @@ col2 = [col(:,2),col(:,1)];
             C12 = zeros(1,DV);
             for pr = 1:DV
                 if delta{col(pr,1),1}(i) ~= 0 
-                    C11(Tindex(pr)) = 1;
-                    if ismember(col(pr,2), col(:,1))
-                        C12(Tindex(pr)) = Bpr(col(pr,1),col(pr,2)); 
-                    end
+                    C11(Tindex(col(pr,1),col(pr,2)) )= 1;
+                end
+                if delta{col(pr,2),1}(i) ~= 0 && ismember(col(pr,2), col(:,1))
+                    C12(Tindex(col(pr,1),col(pr,2))) = Bpr(col(pr,1),col(pr,2)); 
                 end
             end
             C1 = C11 - C12;
             RMP.addRows(Q(i)-capacity(i), C1, inf, sprintf('Capacity_%d',i));
         end
+        
+        
         
 %     % 2. Demand constraint
 %         for p = 1:P
@@ -163,10 +176,12 @@ col2 = [col(:,2),col(:,1)];
  end
     
         %%  Function to return index of decision variables
-function out = Tindex(p)
-        out = p;
-end
-    
+
+    function out = Tindex(p, r)
+        Nodes = 9;
+        out =  (p - 1) * Nodes + r;  % Function given the variable index for each X(i,j) [=(m,n)]  
+              
+    end    
     
     
     
