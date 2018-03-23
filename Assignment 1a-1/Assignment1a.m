@@ -52,7 +52,7 @@ for i = 1:nw.N
 end
 
 % Set up objective function
-cplex.addCols(obj, [], lb, ub, ctype, NameDV);
+cplex.addCols(obj, [], lb, ub); %ctype, NameDV);
 
 
 %%  Constraints
@@ -118,7 +118,7 @@ end
      for k = 1:nw.K
         
         arcs_k     = sol.x(sol.x(:,3) == k,1:2);     % store arcs used by commodity
-        pathlength = size(arcs_k,1);3
+        pathlength = size(arcs_k,1);
         path       = reshape(transpose(arcs_k),1,pathlength*2);
         
         idx_o     = find(path == nw.origin(k));

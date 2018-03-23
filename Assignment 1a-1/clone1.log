@@ -379,3 +379,59 @@ Log for '' Clone_1 (V12.7.1.0) Thu Mar  8 17:05:14 2018
 
 Log for '' Clone_1 (V12.7.1.0) Wed Mar 21 18:29:11 2018
 
+
+Log for '' Clone_1 (V12.7.1.0) Fri Mar 23 18:02:05 2018
+
+
+Log for '' Clone_1 (V12.7.1.0) Fri Mar 23 18:04:25 2018
+
+
+Log for '' Clone_1 (V12.7.1.0) Fri Mar 23 18:04:38 2018
+
+
+Log for 'ARC_Model' Clone_1 (V12.7.1.0) Fri Mar 23 18:12:38 2018
+
+Tried aggregator 0 times.
+No LP presolve or aggregator reductions.
+Presolve time = 0.00 sec. (0.60 ticks)
+Parallel mode: using up to 6 threads for barrier.
+Barrier time = 0.00 sec. (1.04 ticks)
+
+Dual simplex solved model.
+
+
+Log for 'ARC_Model' Clone_1 (V12.7.1.0) Fri Mar 23 19:49:41 2018
+
+Tried aggregator 0 times.
+No LP presolve or aggregator reductions.
+Presolve time = 0.00 sec. (0.60 ticks)
+Parallel mode: using up to 6 threads for barrier.
+Number of nonzeros in lower triangle of A*A' = 5800
+Total time for automatic ordering = 0.00 sec. (0.16 ticks)
+Barrier time = 0.00 sec. (1.42 ticks)
+
+Dual simplex solved model.
+
+
+Log for 'ARC_Model' Clone_1 (V12.7.1.0) Fri Mar 23 20:04:00 2018
+
+Tried aggregator 0 times.
+No LP presolve or aggregator reductions.
+Presolve time = 0.00 sec. (0.60 ticks)
+Barrier time = 0.00 sec. (1.00 ticks)
+
+Dual simplex solved model.
+
+
+Log for 'ARC_Model' Clone_1 (V12.7.1.0) Fri Mar 23 20:05:48 2018
+
+Tried aggregator 0 times.
+No LP presolve or aggregator reductions.
+Presolve time = 0.00 sec. (0.60 ticks)
+Parallel mode: using up to 6 threads for barrier.
+Number of nonzeros in lower triangle of A*A' = 5800
+Total time for automatic ordering = 0.00 sec. (0.32 ticks)
+Barrier time = 0.00 sec. (1.58 ticks)
+
+Dual simplex solved model.
+
