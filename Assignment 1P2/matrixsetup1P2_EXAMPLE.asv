@@ -1,5 +1,5 @@
         %% EXAMPLE Input
-function [P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr] ... 
+function [P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull] ... 
           = matrixsetup1P2_EXAMPLE(filename)  
 
  %filename = 'Input_Example.xlsx';
