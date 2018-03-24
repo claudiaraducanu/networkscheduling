@@ -1,37 +1,45 @@
-%  Initialization
+%%  Initialization
 % Claudia Raducanu and Luka Van de Sype
-addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luk
-% clearvars
-% clear all
-%  Determine input
-%  Select input file and sheet
+addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 
-    %% START
+clearvars
+clear all
+
+%%  Determine input
+input      =  'Input_AE4424_Ass1P2.xlsx';
+
 % Inputs
-
-input      =  'Input_Example.xlsx';
 [P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr] ... 
-            = matrixsetup1P2_EXAMPLE(input) ;
-        
+            = matrixsetup1P2(input) ;
 
-    %% SUPER BIG LOOP
-while not_opt_col == 1 || not_opt_row == 1
 
+iter=0;
+%% SUPER BIG LOOP
 not_opt_col = 1;
 not_opt_row = 1;
-   %% COLUMN GENERATION
+
+titer =0;
+
+while not_opt_col == 1 || not_opt_row == 1
+
+    titer = titer +1;
+    disp('-------------------------------------------------');
+    disp(['Iteration: ',num2str(titer)]);   
+    disp('-------------------------------------------------');
+    
+    
+%% COLUMN GENERATION
 
    while not_opt_col == 1
    %% Objective function
-   
-       %% Parameters
+   iter = iter +1;
     disp('-------------------------------------------------');
     disp(['Column iteration: ',num2str(iter)]);   
     disp('-------------------------------------------------');
 
   %%  Initiate CPLEX model
         %   Create model 
-        model                 =   'Initial_example';  % name of model
+        model                 =   'Initiate';  % name of model
         RMP                   =    Cplex(model); % define the new model
         RMP.Model.sense       =   'minimize';
 
@@ -47,7 +55,7 @@ not_opt_row = 1;
         obj                     =   cost ;
         lb                      =   zeros(DV, 1);                                 %Lower bounds
         ub                      =   inf(DV, 1);                                   %Upper bounds             
-
+        
         RMP.addCols(obj, [], lb, ub);
         
    %%  Constraints
@@ -65,7 +73,9 @@ not_opt_row = 1;
             end
             C1 = C11 - C12;
             RMP.addRows(Q(i)-capacity(i), C1, inf, sprintf('Capacity_%d',i));
-        end      
+        end
+    
+   
         
        %%  Execute model 
     %   Run CPLEX
@@ -82,11 +92,16 @@ not_opt_row = 1;
     %   Get dual variables
     primal  = RMP.Solution.x;   
     dual    = RMP.Solution.dual;
-    pi   = dual;                 % dual variables of capacity constraints (slack)
-%     sigma_k = dual(1:L,1);     % dual variables of demand constraint
-    sigma   = zeros(P,1);
+    pi   = dual(1:L);                 % dual variables of capacity constraints (slack)
+    if size(dual) <= L
+        sigma = zeros(P,1);
+    else
+        sigma   = dual(L+1:end);
+    end
+    
         %% Pricing Problem
-    x = zeros(P,P);
+%    x = zeros(P,P);
+    checkcol = 0; 
     R = P;
     PR = [0 0];
     for p = 1:P
@@ -97,23 +112,35 @@ not_opt_row = 1;
                 pi_i = pi_i + pi(i)*delta{p,1}(i);
                 pi_j = pi_j + pi(i)*delta{r,1}(i);    
             end
-            if (fare(p) - pi_i) - (Bpr(p,r)*(fare(r) - pi_j )) - sigma(p) < 0
-                PR  = [p r];
-                col = [col; PR];
+            if (fare(p) - pi_i) - (Bpr(p,r)*(fare(r) - pi_j )) - sigma(p) < 0 
+                D = find(r==col(:,2));
+                %PR  = [p r];
+                if p ~= col(D,1) 
+                    checkcol = checkcol + 1;
+                    col = [col; [p r]];                  
+                end
             end
         end
     end
     
-    not_opt_col = all(PR);
+    if checkcol == 0
+        not_opt_col = 0;
+    else 
+        not_opt_col = 1;
+    end    
+    checkcol
     
-   end  
-     %% ROW GENERATION
+   end
+   
+   iter
+ 
+%% ROW GENERATION
      iteration = 0;
    while not_opt_row == 1
   %%  Initiate CPLEX model
   iteration = iteration +1;
         %   Create model 
-        model                 =   'Initial_example';  % name of model
+        model                 =   'Initial';  % name of model
         RMP                   =    Cplex(model); % define the new model
         RMP.Model.sense       =   'minimize';
    %% Objective function
@@ -190,30 +217,17 @@ not_opt_row = 1;
         
         
     
-   end  
+   end    
+   
     
-% end
+ end
     
-        %%  Function to return index of decision variables 
+        %%  Function to return index of decision variables
 function out = Tindex(p)
         out = p;
 end
     
-        %% NOT USED
-%         l = 1;                                      % Array with DV names
-%         for p = 1:numel(col(:,1))
-%             for r = 1:numel(col(:,2))                     % of the x_{ij}^k variables
-%                 NameDV (l,:)  = ['T_' num2str(p,'%02d') ',' num2str(r,'%02d')];
-%                 l = l + 1;
-%             end
-%         end
-       % q = [NameDV,char(ones((DV),1) * ('=')),num2str(cplex.Solution.x,'%02d')];
     
-%     function out = Tindex(p, r)
-%         Nodes = 9;
-%         out =  (p - 1) * Nodes + r;  % Function given the variable index for each X(i,j) [=(m,n)]  
-%               
-%     end 
-
-% %     RMP.Param.mip.limits.nodes.Cur    = 1e+8;        %max number of nodes to be visited (kind of max iterations)
-% %     RMP.Param.timelimit.Cur           = 120;         %max time in seconds
+    
+    
+    

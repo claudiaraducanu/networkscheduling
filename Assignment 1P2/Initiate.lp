@@ -1,5 +1,5 @@
 \ENCODING=ISO-8859-1
-\Problem name: Initial
+\Problem name: Initiate
 
 Minimize
  obj: 58 x1 + 97 x2 + 91 x3 + 106 x4 + 104 x5 + 92 x6 + 95 x7 + 103 x8 + 92 x9

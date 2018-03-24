@@ -6,7 +6,7 @@ addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %L
 %  Determine input
 %  Select input file and sheet
 
-    %% START
+    %% Determine input
 % Inputs
 
 input      =  'Input_Example.xlsx';
@@ -15,21 +15,17 @@ input      =  'Input_Example.xlsx';
         
 
     %% SUPER BIG LOOP
-while not_opt_col == 1 || not_opt_row == 1
-
 not_opt_col = 1;
 not_opt_row = 1;
+
+while not_opt_col == 1 || not_opt_row == 1
+
+    % First start the column generation loop
+
    %% COLUMN GENERATION
 
    while not_opt_col == 1
-   %% Objective function
-   
-       %% Parameters
-    disp('-------------------------------------------------');
-    disp(['Column iteration: ',num2str(iter)]);   
-    disp('-------------------------------------------------');
-
-  %%  Initiate CPLEX model
+     %%  Initiate CPLEX model
         %   Create model 
         model                 =   'Initial_example';  % name of model
         RMP                   =    Cplex(model); % define the new model
@@ -82,9 +78,12 @@ not_opt_row = 1;
     %   Get dual variables
     primal  = RMP.Solution.x;   
     dual    = RMP.Solution.dual;
-    pi   = dual;                 % dual variables of capacity constraints (slack)
-%     sigma_k = dual(1:L,1);     % dual variables of demand constraint
-    sigma   = zeros(P,1);
+    pi   = dual(1:L);                 % dual variables of capacity constraints (slack)
+    if size(dual) <= L
+        sigma = zeros(P,1);
+    else
+        sigma   = dual(L+1:end);
+    end
         %% Pricing Problem
     x = zeros(P,P);
     R = P;

@@ -17,7 +17,7 @@
 %    filename = 'Input_AE4424_Ass1P2.xlsx';
 
         %% EXAMPLE Input
-function [P, L, fare, demand, capacity, pathflights, flightnrs] ... 
+function [P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr] ... 
           = matrixsetup1P2_EXAMPLE(filename)  
 
    
@@ -52,8 +52,56 @@ function [P, L, fare, demand, capacity, pathflights, flightnrs] ...
     flightnrs    = flight.flightnr;
     demand       = itinerary.demand;
     capacity     = flight.capacity;
-end
+    
+    %% CALCULATIONS
+    Bpr = xlsread('Bpr',1,'A1:ABJ738') ;
 
+    Rcol = 738;
+    Pcol = 1:P;
+    col = zeros(P,2);
+    for r = Rcol
+        for p = Pcol
+            col(p,:) = [p r];
+        end
+    end
+
+
+    % The binary value: Delta
+    delta = cell(P,1); % For each Path all Flights are checked: delta{p,1}(i)
+    for p = 1:P
+        delta{p,1} = zeros(L,1);
+        for i = 1:L
+            if isequal(pathflights(p,1), flightnrs(i)) || isequal(pathflights(p,2), flightnrs(i))
+                delta{p,1}(i) = 1;            
+            end
+        end
+    end
+
+    delta{738,1} = zeros(L,1);
+
+    % The daily unconstrained demand on flight(i): Q
+    Q = zeros(L,1);
+    for i = 1:L
+        a = zeros(P,1);
+        for p = 1:P
+            a(p) = demand(p)*delta{p,1}(i);
+        end
+        Q(i) = sum(a);
+    end
+
+    % adding the ficticious fare and element
+    fare_r = [fare;0] ; % adding the ficticious recapture fare
+    R = P +1;
+
+
+    costfull = zeros(P,R);      % full cost matrix
+    for p = 1:P
+        for r = 1:R
+            costfull(p,r) = fare(p) - Bpr(p,r)*fare_r(r);
+        end
+    end
+
+end
 %% Write Bpr file
 % ptor = zeros(P);
 % for p = 1:P
