@@ -81,3 +81,14 @@ Barrier time = 0.00 sec. (0.09 ticks)
 
 Dual simplex solved model.
 
+
+Log for 'Initiate' Clone_1 (V12.7.1.0) Sat Mar 24 21:34:40 2018
+
+Tried aggregator 0 times.
+No LP presolve or aggregator reductions.
+Presolve time = 0.00 sec. (0.09 ticks)
+Parallel mode: using up to 6 threads for barrier.
+Barrier time = 0.00 sec. (0.09 ticks)
+
+Dual simplex solved model.
+
