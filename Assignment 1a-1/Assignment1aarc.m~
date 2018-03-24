@@ -141,18 +141,12 @@ end
                 end
             end
             
+            pathlength = s
             
-            
-            sol.path{k,4} = nw.name(sol.path{k,3});
-            pathname = [sol.path{k,4}{1,1}];
-            j =1;
-            while j < pathlength+1
-                pathname = [ pathname, '-', sol.path{k,4}{1,j+1} ]; 
-                j = j+1;
-            end
-            sol.p{k,1} = pathname;
         end
-     end
+        
+        
+    %cell2table(sol.path(:,4))
     
 %% Functions 
 % To return index of decision variables
