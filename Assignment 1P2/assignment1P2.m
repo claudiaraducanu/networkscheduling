@@ -1,7 +1,6 @@
 %%  Initialization
 % Claudia Raducanu and Luka Van de Sype
 addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
-
 clc
 clearvars
 clear all
@@ -66,7 +65,6 @@ titer =0;
     ObjVals = [];
     ObjVals = [ObjVals;RMP.Solution.objval];
     primal  = RMP.Solution.x;   
-    [find(primal),primal(find(primal))];
     dual    = RMP.Solution.dual;
     %RMP.writeModel([model '.lp']);
     
@@ -93,7 +91,6 @@ iter=0;
    while not_opt_col == 1
    %% Iterations
    %%
-   testlist = [];
    iter = iter +1;
     disp('-------------------------------------------------');
     disp(['Column iteration: ',num2str(iter)]);   
@@ -113,7 +110,6 @@ iter=0;
     checkcol = 0; 
     R = P;
     for re = 1:numel(recap_p)
-        %for r = 1:R   
             pi_j = 0;
             pi_i = 0;
             
@@ -136,7 +132,6 @@ iter=0;
                     
                     colz = [colz; [recap_p(re) recap_r(re)]]; % only the added columns
                     col = [col; [recap_p(re) recap_r(re)]];   % all columns
-                    colz
                     
                     cost = [cost;costfull(col(recap_p(re),1),col(recap_p(re),2))];
                     
@@ -188,31 +183,6 @@ iter=0;
         not_opt_row = 1;       
     end    
     
-    %% Adding paths and rows to A matrix
-%     A = zeros(size(RMP.Model.A,1),1);
-%  
-%     % Indices of paths
-%     A(first_nr_from) = 1;
-%     if second_nr_from ~= 0
-%         A(second_nr_from) = 1;
-%     end
-% 
-% 
-%     A(first_nr_to) = -rr;
-%     if second_nr_to ~= 0
-%         A(second_nr_to) = -rr;
-%     end
-% 
-%     %add the correct index in the A matrix for the added
-%     %seperation problem rows
-% 
-% 
-%     if sum(from == added_rows) > 0
-%         indices = find(from == added_rows);
-%         A(232+indices) = 1;
-%     end
-
-    
    end
      
  
@@ -222,6 +192,10 @@ iter=0;
    while not_opt_row == 1
   %%  Initiate CPLEX model
   iteration = iteration +1;
+
+    disp('-------------------------------------------------');
+    disp(['Row iteration: ',num2str(iteration)]);   
+    disp('-------------------------------------------------');
   
   DV     =  numel(col(:,1));
   primal = RMP.Solution.x;
@@ -244,7 +218,7 @@ iter=0;
             end
         end
     end 
-    rowz
+
     
            %%  Execute model 
     %   Run CPLEX
@@ -267,42 +241,3 @@ iter=0;
    end
     
 end
-    
-
-    
-%         %%  Function to return index of decision variables
-% function out = Tindex(p)
-%         out = p;
-% end
-%
-%     % 2. Demand constraint
-%         if isempty(rowz)==0
-%             for ro = 1:numel(rowz)
-%                 C2 = zeros(1,DV);
-%                 C2(rowz(ro)) = 1;
-%                 RMP.addRows(-inf, C2, demand(rowz(ro))), sprintf('Demand_%03d',ro);
-%             end
-%         end
-%             
-%         for p = 1:P
-%         B = find(col(:,1)==p);
-%             if sum(primal(B)) > demand(p) && sum(p~=rowz) == numel(rowz)
-%                 check = check + 1;
-%                 C2 = zeros(1,DV);
-%                 C2(B) = 1;
-%                 RMP.addRows(-inf, C2, demand(p), sprintf('Demand_%03d',p));
-%                 rowz = [rowz;p];
-%             end
-%         end
-   
-%     if RMP.Solution.status == 1 
-%         primal_feasibility = 1; 
-%     end
-%     
-%     disp('-------------------------------------------------');
-%     disp(['Primal Feasibility: ',num2str(primal_feasibility)]);  
-
-    
-    
-    
-    
