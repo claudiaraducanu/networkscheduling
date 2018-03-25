@@ -1,7 +1,6 @@
 %function Triple_R()
 %%  Initialization
-    addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64');
-    
+    addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64')
     clc
  	clearvars
     close all
@@ -18,32 +17,33 @@
 %%
 
 %Flights
-[num,fl_nr,all]=xlsread('wil_je_deze_wel_dan','Flight','A2:A233');
-[num2,fl_ori,all]=xlsread('wil_je_deze_wel_dan','Flight','B2:B233');
-[num3,fl_desti,all]=xlsread('wil_je_deze_wel_dan','Flight','C2:C233');
-[num4,text4,all]=xlsread('wil_je_deze_wel_dan','Flight','D2:D233');
+[num,fl_nr,all]=xlsread('Input_AE4424_Ass1P2.xlsx',1,'A2:A233');
+[num2,fl_ori,all]=xlsread('Input_AE4424_Ass1P2.xlsx',1,'B2:B233');
+[num3,fl_desti,all]=xlsread('Input_AE4424_Ass1P2.xlsx',1,'C2:C233');
+[num4,text4,all]=xlsread('Input_AE4424_Ass1P2.xlsx',1,'D2:D233');
 dep = datestr(num4, 'HH:MM:SS');
 STD = datetime(dep);
-[num5,text5,all]=xlsread('wil_je_deze_wel_dan','Flight','E2:E233');
+[num5,text5,all]=xlsread('Input_AE4424_Ass1P2.xlsx',1,'E2:E233');
 arr = datestr(num5, 'HH:MM:SS');
 STA = datetime(arr);
-[fl_cap,text6,all]=xlsread('wil_je_deze_wel_dan','Flight','F2:F233');
+[fl_cap,text6,all]=xlsread('Input_AE4424_Ass1P2.xlsx',1,'F2:F233');
 
 %passenger itineraries
-[pass_itin,text7,all]=xlsread('wil_je_deze_wel_dan','Itinerary','A2:A738');
-[num8,pass_ori,all]=xlsread('wil_je_deze_wel_dan','Itinerary','B2:B738');
-[num9,pass_desti,all]=xlsread('wil_je_deze_wel_dan','Itinerary','C2:C738');
-[pass_demand,text10,all]=xlsread('wil_je_deze_wel_dan','Itinerary','D2:D738');
-[pass_fare,text11,all]=xlsread('wil_je_deze_wel_dan','Itinerary','E2:E738');
-[num12,pass_leg1,all]=xlsread('wil_je_deze_wel_dan','Itinerary','F2:F738');
-[num13,pass_leg2,all]=xlsread('wil_je_deze_wel_dan','Itinerary','G2:G738');
+[pass_itin,text7,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'A2:A738');
+[num8,pass_ori,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'B2:B738');
+[num9,pass_desti,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'C2:C738');
+[pass_demand,text10,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'D2:D738');
+[pass_fare,text11,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'E2:E738');
+[num12,pass_leg1,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'F2:F738');
+[num13,pass_leg2,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'G2:G738');
 
 %recapture rates
-[recap_from,text14,all]=xlsread('wil_je_deze_wel_dan','Recapture Rate','A2:A300');
-[recap_to,text15,all]=xlsread('wil_je_deze_wel_dan','Recapture Rate','B2:B300');
-[recap_rate,text16,all]=xlsread('wil_je_deze_wel_dan','Recapture Rate','C2:C300');
-[recap_fare_from,text17,all]=xlsread('wil_je_deze_wel_dan','Recapture Rate','D2:D300');
-[recap_fare_to,text18,all]=xlsread('wil_je_deze_wel_dan','Recapture Rate','E2:E300');
+[recap_from,text14,all]=xlsread('Input_AE4424_Ass1P2.xlsx',3,'A2:A300');
+[recap_to,text15,all]=xlsread('Input_AE4424_Ass1P2.xlsx',3,'B2:B300');
+[recap_rate,text16,all]=xlsread('Input_AE4424_Ass1P2.xlsx',3,'C2:C300');
+[recap_fare_from,text17,all]=xlsread('Input_AE4424_Ass1P2.xlsx',3,'D2:D300');
+[recap_fare_to,text18,all]=xlsread('Input_AE4424_Ass1P2.xlsx',3,'E2:E300');
+
 
 
 
@@ -91,16 +91,12 @@ van_naar= [[0:zeven_drie_zeven-1]',ones(zeven_drie_zeven,1)*999];
     
 %%  Objective Function
 
-
-
-
 cost = pass_fare;
 
     obj                     =   cost';                                     % DV coefficients in the OF
     lb                      =   zeros(DV, 1);                              % Lower bounds
     ub                      =   inf(DV, 1);                                % Upper bounds
 %     ctype                   =   char(ones(1, (DV)) * ('C'));             % Variable types 'C'=continuous; 'I'=integer; 'B'=binary
-
 
 
 %% Setting up the Master template of the problem

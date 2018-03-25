@@ -2,7 +2,6 @@
 % Claudia Raducanu and Luka Van de Sype
 addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 
-clc
 clearvars
 clear all
 
@@ -63,12 +62,7 @@ titer =0;
     %%
     sol = RMP.solve();
     ObVals = [ObjVals;RMP.Solution.objval];
-    primal  = RMP.Solution.x;   
-    [find(primal),primal(find(primal))]
-    dual    = RMP.Solution.dual;
-    %RMP.writeModel([model '.lp']);
-    
-    
+    RMP.writeModel([model '.lp']);
 
 %% SUPER BIG LOOP
 %%
@@ -78,8 +72,6 @@ while not_opt_col == 1 || not_opt_row == 1
     disp('-------------------------------------------------');
     disp(['Iteration: ',num2str(titer)]);   
     disp('-------------------------------------------------');
-    
-    dual    = RMP.Solution.dual;
     
     
 %% COLUMN GENERATION
@@ -91,9 +83,44 @@ iter=0;
     disp('-------------------------------------------------');
     disp(['Column iteration: ',num2str(iter)]);   
     disp('-------------------------------------------------');
+
+ 
+        
+
+        
+%     % 2. Demand constraint
+%         if isempty(rowz)==0
+%             for ro = 1:numel(rowz)
+%                 C2 = zeros(1,DV);
+%                 C2(rowz(ro)) = 1;
+%                 RMP.addRows(-inf, C2, demand(rowz(ro))), sprintf('Demand_%03d',ro);
+%             end
+%         end
+%             
+%         for p = 1:P
+%         B = find(col(:,1)==p);
+%             if sum(primal(B)) > demand(p) && sum(p~=rowz) == numel(rowz)
+%                 check = check + 1;
+%                 C2 = zeros(1,DV);
+%                 C2(B) = 1;
+%                 RMP.addRows(-inf, C2, demand(p), sprintf('Demand_%03d',p));
+%                 rowz = [rowz;p];
+%             end
+%         end
+   
+        
+
+    
+%     if RMP.Solution.status == 1 
+%         primal_feasibility = 1; 
+%     end
+%     
+%     disp('-------------------------------------------------');
+%     disp(['Primal Feasibility: ',num2str(primal_feasibility)]);  
     
     %   Get dual variables
-    
+    primal  = RMP.Solution.x;   
+    dual    = RMP.Solution.dual;
     pi   = dual(1:L);                 % dual variables of capacity constraints (slack)
     sigma = zeros(P,1);
     if size(dual) > L
@@ -225,37 +252,7 @@ iter=0;
 function out = Tindex(p)
         out = p;
 end
-   
-        
-
-        
-%     % 2. Demand constraint
-%         if isempty(rowz)==0
-%             for ro = 1:numel(rowz)
-%                 C2 = zeros(1,DV);
-%                 C2(rowz(ro)) = 1;
-%                 RMP.addRows(-inf, C2, demand(rowz(ro))), sprintf('Demand_%03d',ro);
-%             end
-%         end
-%             
-%         for p = 1:P
-%         B = find(col(:,1)==p);
-%             if sum(primal(B)) > demand(p) && sum(p~=rowz) == numel(rowz)
-%                 check = check + 1;
-%                 C2 = zeros(1,DV);
-%                 C2(B) = 1;
-%                 RMP.addRows(-inf, C2, demand(p), sprintf('Demand_%03d',p));
-%                 rowz = [rowz;p];
-%             end
-%         end
-   
-%     if RMP.Solution.status == 1 
-%         primal_feasibility = 1; 
-%     end
-%     
-%     disp('-------------------------------------------------');
-%     disp(['Primal Feasibility: ',num2str(primal_feasibility)]);  
-
+    
     
     
     
