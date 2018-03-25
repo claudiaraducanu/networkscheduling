@@ -17,7 +17,7 @@
 %    filename = 'Input_AE4424_Ass1P2.xlsx';
 
         %% EXAMPLE Input
-function [P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr ... 
+function [P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr, ... 
           recap_p, recap_r, recaprate] = matrixsetup1P2(filename)  
 
    

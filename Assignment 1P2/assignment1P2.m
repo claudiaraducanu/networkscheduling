@@ -10,7 +10,7 @@ clear all
 input      =  'Input_AE4424_Ass1P2.xlsx';
 
 % Inputs
-[P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr ... 
+[P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr, ... 
      recap_p, recap_r, recaprate] = matrixsetup1P2(input) ;
 
 not_opt_col = 1;
@@ -134,8 +134,9 @@ iter=0;
                 if isempty(Dp) == 1 || isempty(D) == 1
                     checkcol = checkcol + 1;
                     
-                    colz = [colz, [recap_p(re) recap_r(re)]]; % only the added columns
+                    colz = [colz; [recap_p(re) recap_r(re)]]; % only the added columns
                     col = [col; [recap_p(re) recap_r(re)]];   % all columns
+                    colz
                     
                     cost = [cost;costfull(col(recap_p(re),1),col(recap_p(re),2))];
                     
@@ -164,7 +165,8 @@ iter=0;
                 end
             end
     end
-end
+   
+
     
     RMP.solve();
     ObjVals = [ObjVals;RMP.Solution.objval];
@@ -212,8 +214,7 @@ end
 
     
    end
-   
-  
+     
  
 %% ROW GENERATION
 %%
@@ -263,9 +264,9 @@ end
         not_opt_col = 1;
     end       
         
+   end
     
-end    
-   
+end
     
 
     
