@@ -315,7 +315,6 @@ while opt_col + opt_row ~= 2
                 %add the correct index in the A matrix for the added
                 %seperation problem rows
                 
-                i
                 
                 if sum(from == added_rows) > 0
                     indices = find(from == added_rows);
@@ -411,6 +410,7 @@ while opt_col + opt_row ~= 2
         vorige = huidige;
 
     end
+ 
 
 end
 

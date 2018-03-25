@@ -119,15 +119,20 @@ iter=0;
             pi_i = 0;
             
             for i = 1:L
-                pi_i = pi_i + pi(i)*delta{p,1}(i);
-                pi_j = pi_j + pi(i)*delta{r,1}(i);    
+                if delta{p,1}(i) ~= 0
+                    pi_i = pi_i + pi(i);
+                end
+                if delta{r,1}(i) ~= 0
+                    pi_j = pi_j + pi(i);   
+                end
             end
             
             
             if (fare(p) - pi_i) - (Bpr(p,r)*(fare(r) - pi_j )) - sigma(p) < 0 
                 D = find(r==col(:,2));
+                Dp = find(col(D,1)==p);
                 
-                if p ~= col(D,1) || isempty(D)   
+                if isempty(Dp) == 1 || isempty(D) == 1
                     checkcol = checkcol + 1;
                     
                     colz = [colz, [p r]]; % only the added columns
@@ -137,31 +142,26 @@ iter=0;
                     
                     % New objective function
                     A       = RMP.Model.A(:,p);
-                    if Bpr(p,r) ~= 0
-                        deltas = find(delta(p,1)(:)~=0);
-                        A(deltas) = -Bpr(p,r);
-                    end
                     
-                    % 
-                    deltasp = find(delta(p,1)(:)~=0);
+                    % add a constraint to every L if the leg is used in p.
+                    deltasp = find(delta{p,1}(:)~=0);
                     if isempty(deltasp) ~= 0 
                         A(deltasp)= 1;
                     end
                     
-                    deltasr = find(delta(r,1)(:)~=0);
+                    % substract rr to every L if the leg is used in r.
+                    deltasr = find(delta{r,1}(:)~=0);
                     if deltasr
-                        C12(pr) = Bpr(col(pr,1),col(pr,2)); 
+                        A(deltasr)= -Bpr(p,r); 
                     end
                     
-                    obj     = cost;
+                    obj     = costfull(col(p,1),col(p,2));
                     lb      = [0];
                     ub      = [inf];
                     ctype   = [];
 
                     RMP.addCols(obj,A,lb,ub);
 
-
-                    test_list = [test_list,A];
                 end
             end
         end
@@ -222,6 +222,7 @@ iter=0;
   %%  Initiate CPLEX model
   iteration = iteration +1;
   
+  DV     =  numel(col(:,1));
   primal = RMP.Solution.x;
     
         %% Separation Problem
@@ -230,12 +231,16 @@ iter=0;
     for p = 1:P
         B = find(col(:,1)==p);
         
-        if sum(primal(B)) > demand(p) && sum(p~=rowz) == numel(rowz)
-            check = check + 1;
-            C = zeros(1,DV);
-            C(B) = 1;
-            RMP.addRows(-inf, C, demand(p), sprintf('Demand_%03d',p));
-            rowz = [rowz;p];
+        if sum(primal(B)) > demand(p)
+            D = find(p==rowz);
+            
+            if isempty(D) == 1
+                check = check + 1;
+                C = zeros(1,DV);
+                C(B) = 1;
+                RMP.addRows(-inf, C, demand(p), sprintf('Demand_%03d',p));
+                rowz = [rowz;p];
+            end
         end
     end 
     

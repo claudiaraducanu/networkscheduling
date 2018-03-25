@@ -119,8 +119,12 @@ iter=0;
             pi_i = 0;
             
             for i = 1:L
-                pi_i = pi_i + pi(i)*delta{p,1}(i);
-                pi_j = pi_j + pi(i)*delta{r,1}(i);    
+                if delta{p,1}(i) ~= 0
+                    pi_i = pi_i + pi(i);
+                end
+                if delta{r,1}(i) ~= 0
+                    pi_j = pi_j + pi(i);   
+                end
             end
             
             
@@ -175,6 +179,7 @@ iter=0;
     end
 
     
+    
     if checkcol == 0
         not_opt_col = 0;
     else 
@@ -218,6 +223,7 @@ iter=0;
   %%  Initiate CPLEX model
   iteration = iteration +1;
   
+  DV     =  numel(col(:,1));
   primal = RMP.Solution.x;
     
         %% Separation Problem
@@ -227,7 +233,7 @@ iter=0;
         B = find(col(:,1)==p);
         
         if sum(primal(B)) > demand(p)
-            D = find(p==row(:,1));
+            D = find(p==rowz);
             
             if isempty(D) == 1
                 check = check + 1;
@@ -238,6 +244,7 @@ iter=0;
             end
         end
     end 
+    rowz
     
            %%  Execute model 
     %   Run CPLEX
