@@ -161,12 +161,13 @@ end
             sol.p{path1,4} = pathname;
             sol.p{path1,5} = sol.DV(k,sol.path{k,1}(1,1)); 
             sol.p{path1,6} = nw.demand(k); 
+            sol.p{path1,7} = sum(network.Edges.Weight(sol.path{k,1}),1);
             path1 = path1+1;
         end
      end
      
      T = cell2table(sol.p,...
-    'VariableNames',{'Commodity' 'Origin' 'Destination' 'Path' 'Quantity' 'Demand'});
+    'VariableNames',{'Commodity' 'Origin' 'Destination' 'Path' 'Quantity' 'Demand' 'Cost'});
     writetable(T,'onepath.txt')
      
     
