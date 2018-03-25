@@ -34,8 +34,8 @@ STA = datetime(arr);
 [num9,pass_desti,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'C2:C738');
 [pass_demand,text10,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'D2:D738');
 [pass_fare,text11,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'E2:E738');
-[num12,pass_leg1,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'F2:F738');
-[num13,pass_leg2,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'G2:G738');
+[~,pass_leg1,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'F2:F738');
+[~,pass_leg2,all]=xlsread('Input_AE4424_Ass1P2.xlsx',2,'G2:G738');
 
 %recapture rates
 [recap_from,text14,all]=xlsread('Input_AE4424_Ass1P2.xlsx',3,'A2:A300');
