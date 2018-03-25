@@ -102,6 +102,7 @@ end
     sol.path = cell(nw.K,1);
     nw.name  = network.Nodes.Name';
     %nw.destination   = network.Nodes.Name(nw.destination);
+    path1 = 1;
     
      for k = 1:nw.K
         sol.path{k,1}          = find(sol.DV(k,:));
@@ -125,7 +126,10 @@ end
             multiplepaths = [ multiplepaths k];
         end
         
-        if nopaths == 1    
+        if nopaths == 1  
+            
+            
+            
             for i = 1:(pathlength)
                 if isequal(sol.path{k,2}(i,1),nw.origin(k)) == 1
                     sol.path{k,3}      = sol.path{k,2}(i,:);
@@ -142,7 +146,6 @@ end
             end
             
             
-            
             sol.path{k,4} = nw.name(sol.path{k,3});
             pathname = [sol.path{k,4}{1,1}];
             j =1;
@@ -150,9 +153,23 @@ end
                 pathname = [ pathname, '-', sol.path{k,4}{1,j+1} ]; 
                 j = j+1;
             end
-            sol.p{k,1} = pathname;
+          
+            
+            sol.p{path1,1} = k;
+            sol.p{path1,2} = network.Nodes.Name(nw.origin(k));
+            sol.p{path1,3} = network.Nodes.Name(nw.destination(k));
+            sol.p{path1,4} = pathname;
+            sol.p{path1,5} = sol.DV(k,sol.path{k,1}(1,1)); 
+            sol.p{path1,6} = nw.demand(k); 
+            path1 = path1+1;
         end
      end
+     
+     T = cell2table(sol.p,...
+    'VariableNames',{'Commodity' 'Origin' 'Destination' 'Path' 'Quantity' 'Demand'});
+    writetable(T,'onepath.txt')
+     
+    
     
 %% Functions 
 % To return index of decision variables
