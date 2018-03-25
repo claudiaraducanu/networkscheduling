@@ -17,8 +17,8 @@
 %    filename = 'Input_AE4424_Ass1P2.xlsx';
 
         %% EXAMPLE Input
-function [P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr] ... 
-          = matrixsetup1P2_EXAMPLE(filename)  
+function [P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr ... 
+          recap_p, recap_r, recaprate] = matrixsetup1P2(filename)  
 
    
    % All dependend on P (itineraries)
@@ -34,9 +34,9 @@ function [P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr]
     flight.capacity             = xlsread(filename,1,'F2:F233'); % capacity associated to existing arc
     
    % All about recapturing
-%     recapture.rate     = xlsread(filename,3,'C2:C300'); % recapture rate associated to some arcs
-%     recapture.p   = xlsread(filename,3,'G2:G300'); % recaptured from path p
-%     recapture.r   = xlsread(filename,3,'H2:H300'); % recaptured to path r
+    recapture.rate     = xlsread(filename,3,'C2:C300'); % recapture rate associated to some arcs
+    recapture.p   = xlsread(filename,3,'G2:G300'); % recaptured from path p
+    recapture.r   = xlsread(filename,3,'H2:H300'); % recaptured to path r
 
 
         %% EXAMPLE Output INITIALISATION!!!!!!!!!!!!!!!!!!!!
@@ -45,9 +45,9 @@ function [P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr]
     L = numel(flight.capacity);  % ugly way of doing things
     
     fare   = itinerary.fare;    % Initially all can be recaptured to p=0, with fare_0 = 0
-%     recap_p      = recapture.p ;
-%     recap_r      = recapture.r ;
-%     recaprate    = recapture.rate ;
+    recap_p      = recapture.p ;
+    recap_r      = recapture.r ;
+    recaprate    = recapture.rate ;
     pathflights  = itinerary.flightnr ;
     flightnrs    = flight.flightnr;
     demand       = itinerary.demand;

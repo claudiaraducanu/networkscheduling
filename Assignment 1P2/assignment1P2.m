@@ -10,8 +10,8 @@ clear all
 input      =  'Input_AE4424_Ass1P2.xlsx';
 
 % Inputs
-[P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr] ... 
-            = matrixsetup1P2(input) ;
+[P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr ... 
+     recap_p, recap_r, recaprate] = matrixsetup1P2(input) ;
 
 not_opt_col = 1;
 not_opt_row = 1;
@@ -112,50 +112,49 @@ iter=0;
     
     checkcol = 0; 
     R = P;
-    for p = 1:P
-        for r = 1:R
-            
+    for re = 1:numel(recap_p)
+        %for r = 1:R   
             pi_j = 0;
             pi_i = 0;
             
             for i = 1:L
-                if delta{p,1}(i) ~= 0
+                if delta{recap_p(re),1}(i) ~= 0
                     pi_i = pi_i + pi(i);
                 end
-                if delta{r,1}(i) ~= 0
+                if delta{recap_r(re),1}(i) ~= 0
                     pi_j = pi_j + pi(i);   
                 end
             end
             
             
-            if (fare(p) - pi_i) - (Bpr(p,r)*(fare(r) - pi_j )) - sigma(p) < 0 
-                D = find(r==col(:,2));
-                Dp = find(col(D,1)==p);
+            if (fare(recap_p(re)) - pi_i) - (Bpr(recap_p(re),recap_r(re))*(fare(recap_r(re)) - pi_j )) - sigma(recap_p(re)) < 0 
+                D = find(recap_r(re)==col(:,2));
+                Dp = find(col(D,1)==recap_p(re));
                 
                 if isempty(Dp) == 1 || isempty(D) == 1
                     checkcol = checkcol + 1;
                     
-                    colz = [colz, [p r]]; % only the added columns
-                    col = [col; [p r]];   % all columns
+                    colz = [colz, [recap_p(re) recap_r(re)]]; % only the added columns
+                    col = [col; [recap_p(re) recap_r(re)]];   % all columns
                     
-                    cost = [cost;costfull(col(p,1),col(p,2))];
+                    cost = [cost;costfull(col(recap_p(re),1),col(recap_p(re),2))];
                     
                     % New objective function
-                    A       = RMP.Model.A(:,p);
+                    A       = RMP.Model.A(:,recap_p(re));
                     
                     % add a constraint to every L if the leg is used in p.
-                    deltasp = find(delta{p,1}(:)~=0);
+                    deltasp = find(delta{recap_p(re),1}(:)~=0);
                     if isempty(deltasp) ~= 0 
                         A(deltasp)= 1;
                     end
                     
                     % substract rr to every L if the leg is used in r.
-                    deltasr = find(delta{r,1}(:)~=0);
+                    deltasr = find(delta{recap_r(re),1}(:)~=0);
                     if deltasr
-                        A(deltasr)= -Bpr(p,r); 
+                        A(deltasr)= -Bpr(recap_p(re),recap_r(re)); 
                     end
                     
-                    obj     = costfull(col(p,1),col(p,2));
+                    obj     = costfull(col(recap_p(re),1),col(recap_p(re),2));
                     lb      = [0];
                     ub      = [inf];
                     ctype   = [];
@@ -164,8 +163,8 @@ iter=0;
 
                 end
             end
-        end
     end
+end
     
     RMP.solve();
     ObjVals = [ObjVals;RMP.Solution.objval];
@@ -265,10 +264,10 @@ iter=0;
     end       
         
     
-   end    
+end    
    
     
- end
+
     
 %         %%  Function to return index of decision variables
 % function out = Tindex(p)
