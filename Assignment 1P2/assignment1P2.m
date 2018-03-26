@@ -160,8 +160,6 @@ iter=0;
                     ctype   = []; 
 
                     RMP.addCols(obj,A,lb,ub);
-                    size(col)
-
                 end
             end
     end
@@ -194,6 +192,7 @@ iter=0;
 %% ROW GENERATION
 %%
      iteration = 0;
+
    while not_opt_row == 1
   %%  Initiate CPLEX model
   iteration = iteration +1;
@@ -205,7 +204,7 @@ iter=0;
   
   DV     =  numel(col(:,1));
   primal = RMP.Solution.x;
-    
+     
         %% Separation Problem
     % 2. Demand constraint
     check = 0;
