@@ -68,8 +68,10 @@ titer =0;
     dual    = RMP.Solution.dual;
     %RMP.writeModel([model '.lp']);
     
-
-    
+    connie
+    for p = 1:P
+        if primal(p) > demand(p)
+            connie = connie
     
     
     
