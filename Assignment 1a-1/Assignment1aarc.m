@@ -126,9 +126,8 @@ end
             multiplepaths = [ multiplepaths k];
         end
         
+        
         if nopaths == 1  
-            
-            
             
             for i = 1:(pathlength)
                 if isequal(sol.path{k,2}(i,1),nw.origin(k)) == 1
@@ -169,7 +168,17 @@ end
      T = cell2table(sol.p,...
     'VariableNames',{'Commodity' 'Origin' 'Destination' 'Path' 'Quantity' 'Demand' 'Cost'});
     writetable(T,'onepath.txt')
-     
+    
+    
+    for j = 1:size(multiplepaths,2)
+        sol.mpath{j,1} = network.Edges(sol.path{multiplepaths(j),1},1:2);
+        sol.mpath{j,1}.Quantity = sol.DV(multiplepaths(j),sol.path{multiplepaths(j),1})';
+        sol.mpath{j,2} = nw.name(nw.origin(multiplepaths(j)));
+        sol.mpath{j,3} = nw.name(nw.destination(multiplepaths(j)));
+        sol.mpath{j,4} = nw.demand(multiplepaths(j));
+        
+    end
+    %nw.name(nw.destination(multiplepaths))'
     
     
 %% Functions 

@@ -8,13 +8,13 @@ clear all
 %%  Determine input
 %   Select input file and sheet     
      
-%input      =  'Input_AE4424_Ass1Verification.xlsx';
-input      =  'Input_AE4424_Ass1P1.xlsx';
+input      =  'Input_AE4424_Ass1Verification.xlsx';
+%input      =  'Input_AE4424_Ass1P1.xlsx';
 
 %% Inputs
 
     [nodes, K, arcs, origin, destination, demand,od(:,1),od(:,2),capacity] = ...
-    read_arc(input);
+    read_arc_v(input);
 
     A = size(od,1);  % number of arcs
     
@@ -72,10 +72,9 @@ input      =  'Input_AE4424_Ass1P1.xlsx';
     i = 0;
    
 %% B: Solve RMP
-while i < 5
+
     %% Parameters
-    
-    i= i+1;
+   
     disp('-------------------------------------------------');
     disp(['Iteration: ',num2str(i)]);   
     disp('-------------------------------------------------');
@@ -107,13 +106,16 @@ while i < 5
         C2 = c.ineq(a,:);
         RMP.addRows(0, C2, capacity(a,1));
     end
-
-    %%  Execute model
-    RMP.Param.timelimit.Cur           = 120;         %max time in seconds
+     %%  Execute model
+    %RMP.Param.timelimit.Cur           = 120;         %max time in seconds
  
     %   Run CPLEX
     RMP.solve();
-    RMP.writeModel([model '.lp']);
+    RMP.writeModel([model '.lp']);   
+    
+while i < 5  
+    i=i+1;
+
     
     if RMP.Solution.status == 1 
         primal_feasibility = 1; 
@@ -124,7 +126,6 @@ while i < 5
     
     %   Get dual variables
     primal  = RMP.Solution.x;
-    
     
     dual    = RMP.Solution.dual;
     pi_ij   = dual(K+1:end,1); % dual variables of bundle constraints (slack)
@@ -137,7 +138,6 @@ while i < 5
     
     sp.coliq       = zeros(A,K);
     
-    
     for k = 1:K
         sp.path{k,i+1}      = shortestpath(pricing_arc,origin(k),destination(k));
         eidx                = findedge(pricing_arc, sp.path{k,i+1}(1:end-1), sp.path{k,i+1}(2:end));             
@@ -149,29 +149,31 @@ while i < 5
     
     % Determine for which commodity to add path. 
     
-    col_idx   = find(cell2mat(sp.dist(:,i+1)) < sigma_k./demand'); 
+    col_idx   = find(cell2mat(sp.dist(:,i+1)) < sigma_k./demand')
     
     P             = P + size(col_idx,1); % total number of paths
     P_k(col_idx') = P_k(col_idx')+1;     % total number of paths for commodity k  
     
     
-    c.ineq = [c.ineq sp.coliq(:,col_idx)]; 
+    c.ineq    = sp.coliq(:,col_idx); 
     
-    sp.coleq      = c.eq(:,col_idx);
+    sp.coleq  = c.eq(:,col_idx);
     
-    c.eq   = [ c.eq sp.coleq];
+    c.eq   =  sp.coleq;
+    
+    A1       = [ c.eq ; c.ineq];
     
     if isempty(col_idx) 
         dual_feasibility = 1; 
     end
-  
-    obj.o = [ obj.o ; demand(col_idx)'.*cell2mat(sp.dist(col_idx,i+1))];
     
+    RMP.addCols(demand(col_idx)'.*cell2mat(sp.dist(col_idx,i+1)),A1);
     stop =  dual_feasibility + primal_feasibility;
     
     disp(['Stop: ',num2str(stop)]);   
     disp('-------------------------------------------------');
-    
+    RMP.solve();
+    RMP.writeModel([model '.lp']);
     
 end
 %    

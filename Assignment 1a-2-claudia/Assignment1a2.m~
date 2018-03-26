@@ -267,11 +267,13 @@ end
   frac    = frac';
   
   dd(:,3) = frac(~cellfun('isempty',data));  
-  for j = 1:size(dd,1)
-      dd{j,4} = demand(dd{j,1})*dd{j,3};
+    for j = 1:size(dd,1)
+      pathname   = arcs.Nodes.Name(dd{j,2}(1,1));
+      n = 1; 
+      while n < pathlength
+        pathname = strcat( pathname, '-', arcs.Nodes.Name(dd{j,2}(1,n+1)) ); 
+        n = n+1;
+      end
+      dd{j,2} = pathname;
   end
-  
-   T = cell2table(dd,...
-    'VariableNames',{'Commodity' 'Path' 'Fraction' 'Quantity'});
-    writetable(T,'columngen.txt')
   
