@@ -246,3 +246,33 @@ iter=0;
    end
     
 end
+
+%% Post Processing
+%%
+%% Spilled Passengers
+%%
+spilled = zeros(L,1);
+for i = 1:L
+    gotspill = zeros(DV,1);
+    for pr = 1:DV
+       gotspill = RMP.Solution.x(col(pr,2));   
+    end
+    spilled(i) = Q(i)-capacity(i)+gotspill;
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
