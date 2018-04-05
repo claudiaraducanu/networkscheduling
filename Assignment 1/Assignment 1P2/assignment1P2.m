@@ -22,7 +22,7 @@ titer =0;
  %%  Initiate CPLEX model
  %%
         %   Create model 
-        model                 =   'Initiate';  % name of model
+        model                 =   'Model';  % name of model
         RMP                   =    Cplex(model); % define the new model
         RMP.Model.sense       =   'minimize';
 
@@ -98,7 +98,6 @@ iter=0;
     disp('-------------------------------------------------');
     disp(['Column iteration: ',num2str(iter)]);   
     disp('-------------------------------------------------');
-    size(col)
     
    %% Pricing Problem
    %%
@@ -107,7 +106,7 @@ iter=0;
     sigma = zeros(P,1);
     if size(dual) > L
         for ro = 1:numel(rowz)
-            sigma(rowz(ro))  = dual(L+ro);
+            sigma(rowz(ro)) = dual(L+ro);
         end
     end
     
