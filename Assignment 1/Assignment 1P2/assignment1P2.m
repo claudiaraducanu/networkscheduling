@@ -1,9 +1,9 @@
 %%  Initialization
 % Claudia Raducanu and Luka Van de Sype
 addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
-clc
-clearvars
-clear all
+% clc
+ clearvars
+% clear all
 
 %%  Determine input
 input      =  'Input_AE4424_Ass1P2.xlsx';
@@ -11,6 +11,10 @@ input      =  'Input_AE4424_Ass1P2.xlsx';
 % Inputs
 [P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr, ... 
      recap_p, recap_r, recaprate] = matrixsetup1P2(input) ;
+ 
+% input      =  'Input_Example.xlsx';
+% [P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr, ... 
+%        recap_p, recap_r, recaprate] = matrixsetup1P2_EXAMPLE(input) ;
 
 not_opt_col = 1;
 not_opt_row = 1;
@@ -62,18 +66,18 @@ titer =0;
     %%  Execute model 
     %%
     sol = RMP.solve();
-    ObjVals = [];
-    ObjVals = [ObjVals;RMP.Solution.objval];
+    OV = [];
+    OV = [OV;RMP.Solution.objval];
     primal  = RMP.Solution.x;   
     dual    = RMP.Solution.dual;
-    %RMP.writeModel([model '.lp']);
+    RMP.writeModel([model '.lp']);
     
 
     
     
     
     
-    
+    Alist = [RMP.Model.A];
     
 
 %% SUPER BIG LOOP
@@ -112,26 +116,27 @@ iter=0;
     
     checkcol = 0; 
     R = P;
-    for re = 1:numel(recap_p)
+    
+    for re = 1:numel(recap_p) % run only for those that can be recaptured
             pi_j = 0;
             pi_i = 0;
             
             for i = 1:L
-                if delta{recap_p(re),1}(i) ~= 0
-                    pi_i = pi_i + pi(i);
+                if delta{recap_p(re),1}(i) ~= 0     % search for the flight legs for each recap_p
+                    pi_i = pi_i + pi(i);            % for those flight legs, add pi
                 end
                 if delta{recap_r(re),1}(i) ~= 0
                     pi_j = pi_j + pi(i);   
                 end
             end
             
-            
-            if (fare(recap_p(re)) - pi_i) - (Bpr(recap_p(re),recap_r(re))*(fare(recap_r(re)) - pi_j )) - sigma(recap_p(re)) < 0 
+% recap_p is the path p that can be recaptured by path r in recap_r            
+             if (fare(recap_p(re)) - pi_i) - (Bpr(recap_p(re),recap_r(re))*(fare(recap_r(re)) - pi_j )) - sigma(recap_p(re)) < 0 
                 D = find(recap_r(re)==col(:,2));
                 Dp = find(col(D,1)==recap_p(re));
                 
-                if isempty(Dp) == 1 || isempty(D) == 1
-                    checkcol = checkcol + 1;
+                if isempty(Dp) == 1
+                    checkcol = checkcol + 1; % to check if columns are added (loop stop)
                     
                     colz = [colz; [recap_p(re) recap_r(re)]]; % only the added columns
                     col = [col; [recap_p(re) recap_r(re)]];   % all columns
@@ -142,31 +147,37 @@ iter=0;
                     A       = RMP.Model.A(:,recap_p(re));
                     
                     % add a constraint to every L if the leg is used in p.
-                    deltasp = find(delta{recap_p(re),1}(:)~=0);
-                    if isempty(deltasp) ~= 0 
+                    deltasp = 0;
+                    deltasp = find(delta{recap_p(re),1}(:)~=0); % find 
+                    if isempty(deltasp) == 0        % if the list is not 0, add a constraint
                          A(deltasp)= 1;
                     end
                     
                     % substract rr to every L if the leg is used in r.
+                    deltasr = 0;
                     deltasr = find(delta{recap_r(re),1}(:)~=0);
-                    if isempty(deltasr) ~= 0
+                    if isempty(deltasr) == 0        % if the list is not 0, add a constraint
                         A(deltasr)= A(deltasr) - Bpr(recap_p(re),recap_r(re)); 
                     end
                     
-                    obj     = costfull(col(recap_p(re),1),col(recap_p(re),2));
+                    %Alist   = [Alist,A];
+                    
+                    obj     = costfull(recap_p(re),recap_r(re));
                     lb      = [0];
                     ub      = [inf];
-                    ctype   = []; 
+                    %ctype   = []; 
 
                     RMP.addCols(obj,A,lb,ub);
+
                 end
             end
     end
-   
-
     
+     
     RMP.solve();
-    ObjVals = [ObjVals;RMP.Solution.objval];
+    OV = [OV;RMP.Solution.objval];
+    RMP.writeModel([model '.lp']);
+    
     dual = RMP.Solution.dual;
     pi   = dual(1:L);                 % dual variables of capacity constraints (slack)
     sigma = zeros(P,1);
@@ -227,7 +238,7 @@ iter=0;
            %%  Execute model 
     %   Run CPLEX
     RMP.solve();
-    ObjVals = [ObjVals;RMP.Solution.objval];
+    OV = [OV;RMP.Solution.objval];
 
     
 %     %   Get dual variables

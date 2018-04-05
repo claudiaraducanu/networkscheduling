@@ -11,7 +11,7 @@ addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %L
 
 input      =  'Input_Example.xlsx';
 [P, R, L, fare, fare_r, demand, capacity, col, delta, Q, costfull, Bpr] ... 
-            = matrixsetup1P2_EXAMPLE(input) ;
+            recap_p, recap_r, recaprate] = matrixsetup1P2_EXAMPLE(input) ;
         
 
     %% SUPER BIG LOOP
