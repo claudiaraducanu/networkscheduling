@@ -41,7 +41,7 @@
 
         %% EXAMPLE Output INITIALISATION!!!!!!!!!!!!!!!!!!!!
    % What do we need
-    P = numel(itinerary.paths); 
+    P = numel(itinerary.flightnr); 
     L = numel(flight.flightnr);  % ugly way of doing things
     
     fare         = itinerary.fare;    % Initially all can be recaptured to p=0, with fare_0 = 0
@@ -94,12 +94,12 @@
     R = P +1;
 
 
-%     costfull = zeros(P,R);      % full cost matrix
-%     for p = 1:P
-%         for r = 1:R
-%             costfull(p,r) = fare(p) - Bpr(p,r)*fare_r(r);
-%         end
-%     end
+    costfull = zeros(P,R);      % full cost matrix
+    for p = 1:P
+        for r = 1:R
+            costfull(p,r) = fare(p) - Bpr(p,r)*fare_r(r);
+        end
+    end
 
 %end
 %% Write Bpr file
