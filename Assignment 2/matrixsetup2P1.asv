@@ -1,11 +1,22 @@
-% This file contains the function to read most of the input file and some
-% initial calculation. 
+%function [nodes, fare, demand , capacity, origin , dest, recapture, s, ...
+%           t] = matrixsetup(filename)
+       %% Read file for network
+
+    % Not used
+%     [~, ditinerary.origin]  = xlsread(filename,2,'B2:B738'); % names of departure airports
+%     [~, ditinerary.dest]    = xlsread(filename,2,'C2:C738'); % names of arrival airports   
+
+%     [~, dflight.origin]  = xlsread(filename,2,'B2:B738'); % names of departure airports
+%     [~, dflight.dest]    = xlsread(filename,2,'C2:C738'); % names of arrival airports    
+   
+    
+        %% EXAMPLE Input
 
 %    clearvars
 %    clear all
 %    filename = 'Assignment2.xlsx';
-       %% Read file for network
 
+        %% EXAMPLE Input
 function [P, R, L, fare, fare_r, demand, col, delta, Q, costfull, Bpr, ... 
           recap_p, recap_r, recaprate] = matrixsetup2P1(filename)  
 
