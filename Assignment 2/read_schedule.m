@@ -66,14 +66,18 @@ FL.B738.Arrival = FL.B738.Arrival + AC.TAT(4);
 % at which the nodes can be located. 
 
 N_k = zeros(1,A); 
+G_k = 
 
  for j = 1:A
-    idx          = [strcmp(FL.A330.ORG, a(j)) strcmp(FL.A330.DEST, a(j))] ;    % index of nodes departing and arriving at airport j
+    idx         = [strcmp(FL.A330.ORG, a(j)) strcmp(FL.A330.DEST, a(j))] ;    % index of nodes departing and arriving at airport j
     node_j_k     = sortrows([table2cell(FL.A330(idx(:,1),[2 4])) ; table2cell( FL.A330(idx(:,2),[3 5]))],2);
-    G_k          = 
+    %G_k          = 5;
  end 
 
-
+%%
+% If u use the debugger in matlab u should be able to see for each airport (j) the nodes sorted
+% And an i and i+1 pair makes a ground arc
+%%
 
 % flight arc determination for each aircraft
 
