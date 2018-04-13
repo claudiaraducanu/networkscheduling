@@ -1,5 +1,6 @@
-function [AC,B,timespace] = read_schedule(filename)
-
+%function [AC,B,timespace] = read_schedule(filename)
+clearvars
+clear all
 %read_schedule - Read the flight schedule information provided and
 %converts it into a set of nodes and arcs that would represent the
 %time-space network for each aircraft type the airline owns. 
@@ -23,18 +24,17 @@ function [AC,B,timespace] = read_schedule(filename)
 % Assignment 2, Network Scheduling
 
 %% ------------- BEGIN CODE -----------------------------------------------
-
+filename = 'Assignment2.xlsx';
 %% Input 
-    % import chedule of airline
-    [~,~,schedule] = xlsread(filename,1,'A2:I233');
-    [~,varnames]   = xlsread(filename,1,'A1:I1'); 
-    % if flight cannot be operated by aircraft type assign a very high cost
-
-    schedule(strcmp(schedule, 'NA')) = {1000000};
-
-    schedule       = cell2table(schedule,...
-                     'VariableNames',varnames);
-
+     %import schedule of airline
+    schedule = readtable(filename);   
+    
+    %% Use this if we decide to include flights that cannot be operated by 
+    % as specific aircraft type: if flight cannot be operated by aircraft 
+    % type assign a very high cost
+    %schedule(strcmp(schedule, 'NA')) = {1000000};
+    
+%%
     % represent departure and arrival times in a day in minutes 
     % from 0 (0:00) to 1439 (23:59)  
 
@@ -45,11 +45,6 @@ function [AC,B,timespace] = read_schedule(filename)
 
     % sort flights based on the origin airport and then by the departure time             
     schedule = sortrows(schedule,[2,4]);
-
-    % determine the locations ( airports) in the time space networks
-    [a,~,X]  = unique(schedule.ORG); % airport names
-    A         = size(a,1);            % number of airports 
-
 
 %% Separate the flights between the hub airports as they are operate by buses
 
@@ -74,12 +69,28 @@ function [AC,B,timespace] = read_schedule(filename)
 %% L: Flight arcs for each aircraft type k 
 
     L        = size(schedule.ORG,1); % number of flight arcs
-
+    a        = cell(K,1); % airports in time-space network for aircraft type k
+    
     for k = 1:K
         timespace(k).fl         = [schedule(:,1:5) schedule(:,5+k)]; 
         % the flight arc ends at the turn around time
         timespace(k).fl.Arrival = timespace(k).fl.Arrival + AC.TAT(k); 
+        timespace(k).fl.Properties.VariableNames{end} = 'Cost'; 
+        
+        %% Use this part of the code only if we decide to eliminate flights 
+        % that cannot be flown by a specific aircraft type from the time
+        % space network of that flight
+        timespace(k).fl((strcmp(timespace(k).fl.Cost,'NA')),:) = [];
+        a{k,1}(:)    = unique([timespace(k).fl.ORG ; timespace(k).fl.DEST ]);
     end
+
+%% Find airports in time-space network    
+    % If original approach determine the locations ( airports) in the time 
+    % space networks
+    
+    %a  = unique(schedule.ORG); % airport names
+    %A         = size(a,1);            % number of airports        
+    
 
 %% Time space network for each aircraft type k
   
@@ -87,12 +98,12 @@ function [AC,B,timespace] = read_schedule(filename)
         timespace(k).node       = {};
         timespace(k).ga         = {};
         timespace(k).nga        = {};
-        for j = 1:A
+        for j = 1:size(a{k,1},2)
             % index of nodes departing and arriving at airport j 
             % (there may be duplicate nodes at this point because multiple 
             % flight arcs can end at one node)        
-            idx            = [strcmp(timespace(k).fl.ORG, a(j)) ...
-                            strcmp(timespace(k).fl.DEST, a(j))] ; 
+            idx            = [strcmp(timespace(k).fl.ORG, a{k,1}(j)) ...
+                            strcmp(timespace(k).fl.DEST, a{k,1}(j))] ; 
             
             % nodes at one airport j ordered in chronological time 
             %( duplicate nodes removed)
@@ -103,7 +114,7 @@ function [AC,B,timespace] = read_schedule(filename)
             % generate cell array of nodes at airport j with 
             % airport IATA code
             node_j_k       = cell(size(node_j_time,1),2);     
-            node_j_k(:,1)  = {a(j)};                            
+            node_j_k(:,1)  = {a{k,1}(j)};                            
             node_j_k(:,2)  = num2cell(node_j_time);
 
             % cell array that stores all the nodes for an aircraft type
