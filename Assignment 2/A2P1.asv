@@ -27,17 +27,17 @@ titer =0;
         RMP                   =    Cplex(model); % define the new model
         RMP.Model.sense       =   'minimize';
 
-        %   Add the columns
+        %   Decision variables
         DV                      =  numel(col(:,1));
    
         cost = zeros(numel(col(:,1)),1);
         for p = 1:numel(col(:,1))    
-            cost(p) = costfull(col(p,1),col(p,2));  % select only costs you need
+            cost(p) = costfull(col(p,1),col(p,2));                % select only costs you need
         end
 
         obj                     =   cost ;
-        lb                      =   zeros(DV, 1);   % Lower bounds
-        ub                      =   inf(DV, 1);     % Upper bounds             
+        lb                      =   zeros(DV, 1);                                 %Lower bounds
+        ub                      =   inf(DV, 1);                                   %Upper bounds             
         
         RMP.addCols(obj, [], lb, ub);
         
@@ -68,7 +68,13 @@ titer =0;
     dual    = RMP.Solution.dual;
     RMP.writeModel([model '.lp']);
     
+
+    
+    
+    
+    
     Alist = [RMP.Model.A];
+    
 
 %% SUPER BIG LOOP
 %%

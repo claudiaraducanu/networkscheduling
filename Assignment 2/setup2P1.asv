@@ -1,15 +1,40 @@
+function [P, R, L, fare, fare_r, demand, col, delta, Q, costfull, Bpr, ... 
+          recap_p, recap_r, recaprate] = setup2P1(filename)  
+clearvars
+clear all
 % This file contains the function to read most of the input file and some
 % initial calculation. 
+%
+% Inputs:
+%    filename - .xls file containing the information of the airline 
+%   
+% Outputs:
+%    P          - number of passenger itineraries
+%    R          - number of passenger itineraries + the ficitious
+%    L          - number of flights in the schedule
+%    fare       - fare for each itinerary
+%    fare_r     - fare for the recaptured passengers from p to r
+%    demand     - demand for each itinerary
+%    col        - 2 column matrix, containing all columns considered in the
+%                 problem
+%    delta      - cell array, with P cells, containing L elements. Each
+%                 element is 1 if flight is in that itinerary and is 0 
+%                 otherwise.
+%    Q          - the daily unconstrained demand on flight i
+%    costfull   - PxR matrix, containing all costs for each O&D combination
+%    Bpr        - PxR matrix, containing the recapture rates for the p's 
+%                 that can be recaptured by r (written in file: Bpr.xls)
+%    recap_p    - list of all itineraries that can be recaptured
+%    recap_r    - list of all itineraries that can recapture
+%    recaprate  - list of the recapturerates (same order as recap_p/r)
+% Author: Group 4
+% April 2018;
+% Assignment 2, Network Scheduling
 
 %    clearvars
 %    clear all
 %    filename = 'Assignment2.xlsx';
-       %% Read file for network
-
-function [P, R, L, fare, fare_r, demand, col, delta, Q, costfull, Bpr, ... 
-          recap_p, recap_r, recaprate] = matrixsetup2P1(filename)  
-
-   
+       %% Read file for network   
    % All dependend on P (itineraries)
     [~, ditinerary.flightnr]    = xlsread(filename,2,'F2:G738');   % flight numbers both legs
     itinerary.flightnr          = ditinerary.flightnr; 
@@ -30,7 +55,7 @@ function [P, R, L, fare, fare_r, demand, col, delta, Q, costfull, Bpr, ...
         %% Input
    % What do we need
     P = numel(itinerary.paths); 
-    L = numel(flight.flightnr);  % ugly way of doing things
+    L = numel(flight.flightnr); 
     
     fare         = itinerary.fare;    % Initially all can be recaptured to p=0, with fare_0 = 0
     recap_p      = recapture.p ;
