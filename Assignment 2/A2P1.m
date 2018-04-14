@@ -12,23 +12,30 @@ input      =  'Assignment2.xlsx';
 % Inputs
 [P, R, L, fare, fare_r, demand, col, delta, Q, costfull, Bpr, ... 
           recap_p, recap_r, recaprate] = setup2P1(input);
+      % COSTFULL NEEDS TO BE CHANGED (dependent of f now)
+[AC,B,timespace] = read_schedule(input);
 
+% More variables
+K = 4;      % set of fleet types
+Gk = size(timespace(1).ga,1) + size(timespace(2).ga,1) ...
+     + size(timespace(3).ga,1) + size(timespace(4).ga,1);
+
+% Loop stoppers
 not_opt_col = 1;
 not_opt_row = 1;
 colz = [];
 rowz = [];
 
-titer =0;
-
  %%  Initiate CPLEX model
  %%
         %   Create model 
-        model                 =   'Model';  % name of model
+        model                 =   'IFAM';  % name of model
         RMP                   =    Cplex(model); % define the new model
         RMP.Model.sense       =   'minimize';
 
-        %   Add the columns
-        DV                      =  numel(col(:,1));
+        %   Add the colu mns
+        DV                      = K*L + GK...       % DV for FAM part
+                                  numel(col(:,1));  % DV for PMF part
    
         cost = zeros(numel(col(:,1)),1);
         for p = 1:numel(col(:,1))    
@@ -72,6 +79,7 @@ titer =0;
 
 %% SUPER BIG LOOP
 %%
+titer =0;
 while not_opt_col == 1 || not_opt_row == 1
 
     titer = titer +1;
@@ -202,7 +210,8 @@ iter=0;
     disp('-------------------------------------------------');
     size(rowz)
   
-  DV     =  numel(col(:,1));
+  DV                      = K*L + GK...       % DV for FAM part
+                            numel(col(:,1));  % DV for PMF part (incl new)
   primal = RMP.Solution.x;
      
         %% Separation Problem
