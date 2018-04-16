@@ -17,9 +17,10 @@ input      =  'Assignment2.xlsx';
 % More variables
 K = 4;      % set of fleet types
 Lf = 208;   % set of aircraft flights (not going by bus)
-Gk = size(timespace(1).ga,1) + size(timespace(2).ga,1) ... % total amount 
-     + size(timespace(3).ga,1) + size(timespace(4).ga,1);  % of ground arcs (1364)
- 
+Gk = size(timespace(1).ga,1) + size(timespace(2).ga,1) ...   % total amount 
+     + size(timespace(3).ga,1) + size(timespace(4).ga,1)...  % of ground arcs (1364)
+     + size(timespace(1).nga,1) + size(timespace(2).nga,1) ... 
+     + size(timespace(3).nga,1) + size(timespace(4).nga,1);
 % Loop stoppers
 not_opt_col = 1;
 not_opt_row = 1;
@@ -67,16 +68,16 @@ end
             C11 = zeros(1,DV); % Spilled pax from p
             C12 = zeros(1,DV); % Recaptured pax from r to p
             C13 = zeros(1,DV); % Capacity for each flight leg
-            for pr = 1:DV
+            for pr = 1:numel(col(:,1))
                 if delta{col(pr,1),1}(i) ~= 0 
-                    C11(pr)= 1;
+                    C11(Tindex(pr))= 1;
                 end
                 if delta{col(pr,2),1}(i) ~= 0 && ismember(col(pr,2), col(:,1))
-                    C12(pr) = Bpr(col(pr,1),col(pr,2)); 
+                    C12(Tindex(pr)) = Bpr(col(pr,1),col(pr,2)); 
                 end
             end
             for k = 1:K
-                C13(k) = AC.Seats(k);
+                C13(Findex(k,i)) = AC.Seats(k);
             end
             C1 = C13 + C11 - C12;
             RMP.addRows(Q(i), C1, inf, sprintf('Capacity_%d',i));
@@ -85,12 +86,12 @@ end
         for i = Lf+1:L
             C21 = zeros(1,DV); % Spilled pax from p
             C22 = zeros(1,DV); % Recaptured pax from r to p
-            for pr = 1:DV
+            for pr = 1:numel(col(:,1))
                 if delta{col(pr,1),1}(i) ~= 0 
-                    C21(pr)= 1;
+                    C21(Tindex(pr))= 1;
                 end
                 if delta{col(pr,2),1}(i) ~= 0 && ismember(col(pr,2), col(:,1))
-                    C22(pr) = Bpr(col(pr,1),col(pr,2)); 
+                    C22(Tindex(pr)) = Bpr(col(pr,1),col(pr,2)); 
                 end
             end
             C2 = 4*54 + C21 - C22; % 4 busses with 54 seats for each flight
@@ -101,7 +102,7 @@ end
         for i = 1:Lf
             C3 = zeros(1,DV);
             for k = 1:K
-                C3(k) = 1;
+                C3(Findex(k,i)) = 1;
             end
             RMP.addRows(1, C3, 1, sprintf('Flights_%d',i));
         end
@@ -111,8 +112,8 @@ end
     % 5. Fleet size is not exceeded
         for k = 1:K
            C5 = zeros(1,DV);
-           for a = 1:numel(timespace(k).nga.Loc) %set of overnight ground arcs
-               C5(a) = 1;
+           for a = numel(timespace(k).ga.Loc)+1:numel(timespace(k).nga.Loc) %set of overnight ground arcs
+               C5(Yindex(k,a)) = 1; % YINDEX NOT IN CORRECT YET
            end
            RMP.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',i));
         end
@@ -309,19 +310,26 @@ end
 
 %% Post Processing
 %%
-function out = Yindex(k, a)
-    NGA = 34;
-    out =  (k - 1) * NGA + a;  % Function given the variable index for each Y(k,a)
+function out = Yindex(k, a, timespace)
+      GA = size
+%     GA = zeros(5,1);
+%     GA(2) = 358 + 34;
+%     GA(3) = 358 + 349 + 2*34;
+%     GA(4) = 358 + 349 + 353 + 3*34;
+%     GA(5) = 358 + 349 + 353 + 350 + 4*34;
+    for m = 1:k
+        out =   (k - 1) * GA(k)  + a;  % Function given the variable index for each Y(k,a)
+    end
 end
 
 function out = Findex(k, i)
     LF = 208;
-    out = 1364 + (k - 1) * LF + i;  % Function given the variable index for each Y(k,a)
+    out = 1546 + (k - 1) * LF + i;  % Function given the variable index for each F(k,i)
 end
 
-function out = Tindex(i)
+function out = Tindex(pr)
     LF = 208;
-    out = 1364 + (k - 1) * LF + i;  % Function given the variable index for each Y(k,a)
+    out = 2378 + pr;  % Function given the variable index for each T(p,r)
 end
 
 
