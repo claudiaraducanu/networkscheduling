@@ -10,15 +10,22 @@ addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %L
 input      =  'Assignment2.xlsx';
 
 % Inputs
-[P, R, L, fare, fare_r, demand, col, delta, Q, costfull, Bpr, ... 
+[P, R, L, fare, fare_r, demand, col, delta, Q, farecost, Bpr, ... 
           recap_p, recap_r, recaprate] = setup2P1(input);
-      % COSTFULL NEEDS TO BE CHANGED (dependent of f now)
 [AC,B,timespace] = read_schedule(input);
 
 % More variables
 K = 4;      % set of fleet types
-Gk = size(timespace(1).ga,1) + size(timespace(2).ga,1) ...
-     + size(timespace(3).ga,1) + size(timespace(4).ga,1);
+Lf = 208;   % set of aircraft flights (not going by bus)
+% Gk = size(timespace(1).ga,1) + size(timespace(2).ga,1) ... % total amount 
+%       + size(timespace(3).ga,1) + size(timespace(4).ga,1);  % of ground arcs (1364)
+
+% Cost of assigning ac tpye k to flight i (per K all L are given)
+
+ACcost = [timespace(1).fl.Cost; timespace(2).fl.Cost; ...
+          timespace(3).fl.Cost; timespace(4).fl.Cost];
+
+ 
 
 % Loop stoppers
 not_opt_col = 1;
@@ -29,20 +36,20 @@ rowz = [];
  %%  Initiate CPLEX model
  %%
         %   Create model 
-        model                 =   'IFAM';  % name of model
+        model                 =   'IFAM';        % name of model
         RMP                   =    Cplex(model); % define the new model
         RMP.Model.sense       =   'minimize';
 
-        %   Add the colu mns
-        DV                      = K*L + GK...       % DV for FAM part
-                                  numel(col(:,1));  % DV for PMF part
+        %   Add the columns
+        DV                      = K*Lf  ...       % DV for FAM part
+                                  + numel(col(:,1));  % DV for PMF part
    
-        cost = zeros(numel(col(:,1)),1);
+        fcost = zeros(numel(col(:,1)),1);
         for p = 1:numel(col(:,1))    
-            cost(p) = costfull(col(p,1),col(p,2));  % select only costs you need
+            fcost(p) = farecost(col(p,1),col(p,2));  % select only costs you need
         end
 
-        obj                     =   cost ;
+        obj                     =   [fcost] ;
         lb                      =   zeros(DV, 1);   % Lower bounds
         ub                      =   inf(DV, 1);     % Upper bounds             
         
@@ -139,7 +146,7 @@ iter=0;
                     colz = [colz; [recap_p(re) recap_r(re)]]; % only the added columns
                     col = [col; [recap_p(re) recap_r(re)]];   % all columns
                     
-                    cost = [cost;costfull(col(recap_p(re),1),col(recap_p(re),2))];
+                    fcost = [fcost;farecost(col(recap_p(re),1),col(recap_p(re),2))];
                     
                     % New objective function
                     A       = RMP.Model.A(:,recap_p(re));
@@ -160,7 +167,7 @@ iter=0;
                     
                     %Alist   = [Alist,A];
                     
-                    obj     = costfull(recap_p(re),recap_r(re));
+                    obj     = farecost(recap_p(re),recap_r(re));
                     lb      = [0];
                     ub      = [inf];
                     %ctype   = []; 
@@ -210,8 +217,8 @@ iter=0;
     disp('-------------------------------------------------');
     size(rowz)
   
-  DV                      = K*L + GK...       % DV for FAM part
-                            numel(col(:,1));  % DV for PMF part (incl new)
+  DV                      = K*Lf ...       % DV for FAM part
+                            + numel(col(:,1));  % DV for PMF part (incl new)
   primal = RMP.Solution.x;
      
         %% Separation Problem

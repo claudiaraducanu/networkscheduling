@@ -1,4 +1,4 @@
-function [AC,B,timespace] = read_schedule(filename)
+%function [AC,B,timespace] = read_schedule(filename)
 %read_schedule - Read the flight schedule information provided and
 %converts it into a set of nodes and arcs that would represent the
 %time-space network for each aircraft type the airline owns. 
@@ -22,7 +22,9 @@ function [AC,B,timespace] = read_schedule(filename)
 % Assignment 2, Network Scheduling
 
 %% ------------- BEGIN CODE -----------------------------------------------
-%filename = 'Assignment2.xlsx';
+clearvars
+filename = 'Assignment2.xlsx';
+
 %% Input 
      %import schedule of airline
     schedule = readtable(filename);   
@@ -81,6 +83,18 @@ function [AC,B,timespace] = read_schedule(filename)
         timespace(k).fl((strcmp(timespace(k).fl.Cost,'NA')),:) = [];
         a{k,1}(:)    = unique([timespace(k).fl.ORG ; timespace(k).fl.DEST ]);
     end
+    
+    %% Convert the cost of K=3 and K=4 to normal list 
+    % (at the moment they are strings in a cell)
+    % As the strings do not all have the same lenght, it needs be done
+    % seperatly.
+    
+    for k = 3:4
+        for c = 1:numel(timespace(k).fl.Cost)
+            timespace(k).fl.Cost(c) = str2num(cell2mat(timespace(k).fl.Cost(c)));
+        end
+    end
+    
 
 %% Find airports in time-space network    
     % If original approach determine the locations ( airports) in the time 
@@ -140,7 +154,7 @@ function [AC,B,timespace] = read_schedule(filename)
 %     disp(size(timespace(1).ga,1))
 %     disp('Number of overnight arcs for A330: ') 
 %     disp(size(timespace(1).nga,1))
-end
+%end
 
 %% ------------- END OF CODE ----------------------------------------------
 

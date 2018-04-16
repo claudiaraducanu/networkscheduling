@@ -1,4 +1,4 @@
-function [P, R, L, fare, fare_r, demand, col, delta, Q, costfull, Bpr, ... 
+function [P, R, L, fare, fare_r, demand, col, delta, Q, farecost, Bpr, ... 
           recap_p, recap_r, recaprate] = setup2P1(filename)  
 
 % This file contains the function to read most of the input file and some
@@ -108,10 +108,10 @@ function [P, R, L, fare, fare_r, demand, col, delta, Q, costfull, Bpr, ...
     R = P +1;
 
 
-    costfull = zeros(P,R);  % matrix containing costs of all p,r combinations
+    farecost = zeros(P,R);  % matrix containing costs of all p,r combinations
     for p = 1:P
         for r = 1:R
-            costfull(p,r) = fare(p) - Bpr(p,r)*fare_r(r);
+            farecost(p,r) = fare(p) - Bpr(p,r)*fare_r(r);
         end
     end
 
