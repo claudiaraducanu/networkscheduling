@@ -1,4 +1,4 @@
-%function [AC,B,timespace] = read_schedule(filename)
+function [AC,B,timespace] = read_schedule(filename)
 %read_schedule - Read the flight schedule information provided and
 %converts it into a set of nodes and arcs that would represent the
 %time-space network for each aircraft type the airline owns. 
@@ -22,17 +22,15 @@
 % Assignment 2, Network Scheduling
 
 %% ------------- BEGIN CODE -----------------------------------------------
-clearvars
-filename = 'Assignment2.xlsx';
-
 %% Input 
-     %import schedule of airline
-    schedule = readtable(filename);   
+    [~,~,schedule] = xlsread(filename,1,'A2:I233');
+    [~,varnames]   = xlsread(filename,1,'A1:I1'); 
+    % if flight cannot be operated by aircraft type assign a verify high cost
     
-    %% Use this if we decide to include flights that cannot be operated by 
-    % as specific aircraft type: if flight cannot be operated by aircraft 
-    % type assign a very high cost
-    %schedule(strcmp(schedule, 'NA')) = {1000000};
+    schedule(strcmp(schedule, 'NA')) = {1000000};
+
+    schedule       = cell2table(schedule,...
+                 'VariableNames',varnames);
     
 %%
     % represent departure and arrival times in a day in minutes 
@@ -76,32 +74,14 @@ filename = 'Assignment2.xlsx';
         % the flight arc ends at the turn around time
         timespace(k).fl.Arrival = timespace(k).fl.Arrival + AC.TAT(k); 
         timespace(k).fl.Properties.VariableNames{end} = 'Cost'; 
-        
-        %% Use this part of the code only if we decide to eliminate flights 
-        % that cannot be flown by a specific aircraft type from the time
-        % space network of that flight
-        timespace(k).fl((strcmp(timespace(k).fl.Cost,'NA')),:) = [];
-        a{k,1}(:)    = unique([timespace(k).fl.ORG ; timespace(k).fl.DEST ]);
     end
-    
-    %% Convert the cost of K=3 and K=4 to normal list 
-    % (at the moment they are strings in a cell)
-    % As the strings do not all have the same lenght, it needs be done
-    % seperatly.
-    
-    for k = 3:4
-        for c = 1:numel(timespace(k).fl.Cost)
-            timespace(k).fl.Cost(c) = str2num(cell2mat(timespace(k).fl.Cost(c)));
-        end
-    end
-    
-
+         
 %% Find airports in time-space network    
     % If original approach determine the locations ( airports) in the time 
     % space networks
     
-    %a  = unique(schedule.ORG); % airport names
-    %A         = size(a,1);            % number of airports        
+    a  = unique(schedule.ORG);        % airport names
+    A         = size(a,1);            % number of airports        
     
 
 %% Time space network for each aircraft type k
@@ -110,12 +90,12 @@ filename = 'Assignment2.xlsx';
         timespace(k).node       = {};
         timespace(k).ga         = {};
         timespace(k).nga        = {};
-        for j = 1:size(a{k,1},2)
+        for j = 1:A
             % index of nodes departing and arriving at airport j 
             % (there may be duplicate nodes at this point because multiple 
             % flight arcs can end at one node)        
-            idx            = [strcmp(timespace(k).fl.ORG, a{k,1}(j)) ...
-                            strcmp(timespace(k).fl.DEST, a{k,1}(j))] ; 
+            idx            = [strcmp(timespace(k).fl.ORG, a(j)) ...
+                            strcmp(timespace(k).fl.DEST, a(j))] ; 
             
             % nodes at one airport j ordered in chronological time 
             %( duplicate nodes removed)
@@ -126,7 +106,7 @@ filename = 'Assignment2.xlsx';
             % generate cell array of nodes at airport j with 
             % airport IATA code
             node_j_k       = cell(size(node_j_time,1),2);     
-            node_j_k(:,1)  = {a{k,1}(j)};                            
+            node_j_k(:,1)  = {a(j)};                            
             node_j_k(:,2)  = num2cell(node_j_time);
 
             % cell array that stores all the nodes for an aircraft type
@@ -150,11 +130,11 @@ filename = 'Assignment2.xlsx';
             'VariableNames',{'Loc','Departure','Arrival'});
     end
 
-%     disp('Number of ground arcs for A330: ') 
-%     disp(size(timespace(1).ga,1))
-%     disp('Number of overnight arcs for A330: ') 
-%     disp(size(timespace(1).nga,1))
-%end
+    disp('Number of ground arcs for A330: ') 
+    disp(size(timespace(1).ga,1))
+    disp('Number of overnight arcs for A330: ') 
+    disp(size(timespace(1).nga,1))
+end
 
 %% ------------- END OF CODE ----------------------------------------------
 
