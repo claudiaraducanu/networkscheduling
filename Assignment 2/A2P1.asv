@@ -310,18 +310,8 @@ end
 %% Post Processing
 %%
 function out = Yindex(k, a)
-    NGA = 34;
-    out =  (k - 1) * NGA + a;  % Function given the variable index for each Y(k,a)
-end
+    out =  (m - 1) * Nodes + n;  % Function given the variable index for each X(i,j) [=(m,n)]  
 
-function out = Findex(k, i)
-    LF = 208;
-    out = 1364 + (k - 1) * LF + i;  % Function given the variable index for each Y(k,a)
-end
-
-function out = Tindex(i)
-    LF = 208;
-    out = 1364 + (k - 1) * LF + i;  % Function given the variable index for each Y(k,a)
 end
 
 

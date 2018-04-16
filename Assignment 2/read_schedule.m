@@ -130,10 +130,10 @@ function [AC,B,timespace] = read_schedule(filename)
             'VariableNames',{'Loc','Departure','Arrival'});
     end
 
-    disp('Number of ground arcs for A330: ') 
-    disp(size(timespace(1).ga,1))
-    disp('Number of overnight arcs for A330: ') 
-    disp(size(timespace(1).nga,1))
+%     disp('Number of ground arcs for A330: ') 
+%     disp(size(timespace(1).ga,1))
+%     disp('Number of overnight arcs for A330: ') 
+%     disp(size(timespace(1).nga,1))
 end
 
 %% ------------- END OF CODE ----------------------------------------------
