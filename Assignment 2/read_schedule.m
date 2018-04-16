@@ -124,16 +124,20 @@ function [AC,B,timespace] = read_schedule(filename)
                 node_j_k(end,:) node_j_k(1,2)];
 
         end
+        
         timespace(k).nga = cell2table(timespace(k).nga, ...
             'VariableNames',{'Loc','Departure','Arrival'});
         timespace(k).ga  = cell2table(timespace(k).ga,...
             'VariableNames',{'Loc','Departure','Arrival'});
+        
+        % Add overnight arcs to the set of ground arcs
+        timespace(k).gat  = [ timespace(k).ga; timespace(k).nga ];
     end
 
-%     disp('Number of ground arcs for A330: ') 
-%     disp(size(timespace(1).ga,1))
-%     disp('Number of overnight arcs for A330: ') 
-%     disp(size(timespace(1).nga,1))
+    disp('Number of ground arcs for A330: ') 
+    disp(size(timespace(1).ga,1))
+    disp('Number of overnight arcs for A330: ') 
+    disp(size(timespace(1).nga,1))
 end
 
 %% ------------- END OF CODE ----------------------------------------------

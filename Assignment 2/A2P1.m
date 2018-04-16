@@ -1,6 +1,6 @@
 %%  Initialization
 % Claudia Raducanu and Luka Van de Sype
-addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
+%addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 % clc
  clearvars
 % clear all
@@ -17,6 +17,7 @@ input      =  'Assignment2.xlsx';
 % More variables
 K = 4;      % set of fleet types
 Lf = 208;   % set of aircraft flights (not going by bus)
+for 
 Gk = size(timespace(1).ga,1) + size(timespace(2).ga,1) ...   % total amount 
      + size(timespace(3).ga,1) + size(timespace(4).ga,1)...  % of ground arcs (1364)
      + size(timespace(1).nga,1) + size(timespace(2).nga,1) ... 
@@ -47,8 +48,8 @@ end
  %%
         %   Create model 
         model                 =   'IFAM';        % name of model
-        RMP                   =    Cplex(model); % define the new model
-        RMP.Model.sense       =   'minimize';
+        IFAM                   =    Cplex(model); % define the new model
+        IFAM.Model.sense       =   'minimize';
 
         %   Add the columns
         DV                      = Gk ...              % DV for FAM (y_ak)
@@ -59,7 +60,7 @@ end
         lb                      =   zeros(DV, 1);   % Lower bounds
         ub                      =   inf(DV, 1);     % Upper bounds             
         
-        RMP.addCols(obj, [], lb, ub);
+        IFAM.addCols(obj, [], lb, ub);
         
    %%  Constraints
    %%
@@ -80,7 +81,7 @@ end
                 C13(Findex(k,i)) = AC.Seats(k);
             end
             C1 = C13 + C11 - C12;
-            RMP.addRows(Q(i), C1, inf, sprintf('Capacity_%d',i));
+            IFAM.addRows(Q(i), C1, inf, sprintf('Capacity_%d',i));
         end
     % 2. Capacity constraint (for only 'busflights')
         for i = Lf+1:L
@@ -95,7 +96,7 @@ end
                 end
             end
             C2 = 4*54 + C21 - C22; % 4 busses with 54 seats for each flight
-            RMP.addRows(Q(i), C2, inf, sprintf('Capacity_%d',i));
+            IFAM.addRows(Q(i), C2, inf, sprintf('Capacity_%d',i));
         end
         
     % 3. Each flight is operated by 1 aircraft type
@@ -104,30 +105,47 @@ end
             for k = 1:K
                 C3(Findex(k,i)) = 1;
             end
-            RMP.addRows(1, C3, 1, sprintf('Flights_%d',i));
+            IFAM.addRows(1, C3, 1, sprintf('Flights_%d',i));
         end
         
     % 4. What goes in, goes out BY CLAUDIA
-    
+         for k = 1:K
+            N_k = size(timespace(k).node,1);
+            for n = 1:N_k
+               C4 = zeros(1,DV);
+               [idx_ofl,idx_ifl, idx_on, idx_in] = fik_idx(timespace,k,n);
+               for ii = 1:size(idx_ofl,1)
+                   C4(Findex(k,idx_ofl(ii,1))) =  1;
+               end
+               for ii = 1:size(idx_ifl,1)
+                   C4(Findex(k,idx_ifl(ii,1))) = -1;
+               end            
+                C4(Yindex(k, idx_on, timespace)) =1;
+                C4(Yindex(k, idx_in, timespace)) =-1;
+                IFAM.addRows(0, C4, 0, sprintf('Inandout',k,n));
+            end
+        end
     % 5. Fleet size is not exceeded
         for k = 1:K
            C5 = zeros(1,DV);
-           for a = numel(timespace(k).ga.Loc)+1:numel(timespace(k).nga.Loc) %set of overnight ground arcs
+           GA  = numel(timespace(k).ga.Loc);
+           NGA = numel(timespace(k).nga.Loc);
+           for a = GA+1:(GA+NGA) %set of overnight ground arcs
                C5(Yindex(k,a,timespace)) = 1; % YINDEX NOT IN CORRECT YET
            end
-           RMP.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',i));
+           IFAM.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',k));
         end
 
     %%  Execute model 
     %%
-    sol = RMP.solve();
+    sol = IFAM.solve();
     OV = [];
-    OV = [OV;RMP.Solution.objval];
-    primal  = RMP.Solution.x;   
-    dual    = RMP.Solution.dual;
-    RMP.writeModel([model '.lp']);
+    OV = [OV;IFAM.Solution.objval];
+    primal  = IFAM.Solution.x;   
+    dual    = IFAM.Solution.dual;
+    IFAM.writeModel([model '.lp']);
     
-    Alist = [RMP.Model.A];
+    Alist = [IFAM.Model.A];
 
 %% SUPER BIG LOOP
 %%
@@ -139,7 +157,7 @@ while not_opt_col == 1 || not_opt_row == 1
     disp(['Iteration: ',num2str(titer)]);   
     disp('-------------------------------------------------');
     
-    dual    = RMP.Solution.dual;
+    dual    = IFAM.Solution.dual;
     
     
 %% COLUMN GENERATION
@@ -194,7 +212,7 @@ iter=0;
                     t_cost = [t_cost;farecost(col(recap_p(re),1),col(recap_p(re),2))];
                     
                     % New objective function
-                    A       = RMP.Model.A(:,2378+recap_p(re));
+                    A       = IFAM.Model.A(:,2378+recap_p(re));
                     
                     % add a constraint to every L if the leg is used in p.
                     deltasp = 0;
@@ -217,18 +235,18 @@ iter=0;
                     ub      = [inf];
                     %ctype   = []; 
 
-                    RMP.addCols(obj,A,lb,ub);
+                    IFAM.addCols(obj,A,lb,ub);
 
                 end
             end
     end
     
      
-    RMP.solve();
-    OV = [OV;RMP.Solution.objval];
-    RMP.writeModel([model '.lp']);
+    IFAM.solve();
+    OV = [OV;IFAM.Solution.objval];
+    IFAM.writeModel([model '.lp']);
     
-    dual = RMP.Solution.dual;
+    dual = IFAM.Solution.dual;
     pi   = dual(1:L);                 % dual variables of capacity constraints (slack)
     sigma = zeros(P,1);
     if size(dual) > L
@@ -264,7 +282,7 @@ iter=0;
   
   DV                      = Gk + K*Lf ...       % DV for FAM part
                             + numel(col(:,1));  % DV for PMF part (incl new)
-  primal = RMP.Solution.x;
+  primal = IFAM.Solution.x;
      
         %% Separation Problem
     % 2. Demand constraint
@@ -279,7 +297,7 @@ iter=0;
                 check = check + 1;
                 C = zeros(1,DV);
                 C(Tindex(Bc)) = 1;
-                RMP.addRows(-inf, C, demand(p), sprintf('Demand_%03d',p));
+                IFAM.addRows(-inf, C, demand(p), sprintf('Demand_%03d',p));
                 rowz = [rowz;p];
             end
         end
@@ -288,13 +306,13 @@ iter=0;
     
            %%  Execute model 
     %   Run CPLEX
-    RMP.solve();
-    OV = [OV;RMP.Solution.objval];
+    IFAM.solve();
+    OV = [OV;IFAM.Solution.objval];
 
     
 %     %   Get dual variables
-%     primal  = RMP.Solution.x;   
-%     dual    = RMP.Solution.dual;
+%     primal  = IFAM.Solution.x;   
+%     dual    = IFAM.Solution.dual;
     
     
     if check == 0
@@ -311,11 +329,11 @@ end
 %% Post Processing
 %%
 function out = Yindex(k, a, timespace)
-    GA = zeros(1,size(timespace,2));
+    GA  = zeros(1,size(timespace,2));
     for k  = 1:size(timespace,2)
-        GA(k) = size(timespace(k).ga,1);
+        GA(k) = size(timespace(k).gat,1);
     end
-    GA_k    = zeros(size(GA));
+    GA_k    = zeros(size(GA));   
     for k = 2:size(GA,2)
         GA_k(k) = sum(GA(1:k-1));
     end

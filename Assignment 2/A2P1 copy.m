@@ -110,7 +110,7 @@ end
         for k = 1:K
             N_k = size(timespace(k).node,1);
             for n = 1:N_k
-               [idx_ofl,idx_ifl] = fik_idx(timespace,k,n);
+               [idx_ofl,idx_ifl, idx_on, idx_in] = fik_idx(timespace,k,n);
                for ii = 1:size(idx_ofl,1)
                    C4(Findex(k,idx_ofl(ii,1)) =  1;
                end
