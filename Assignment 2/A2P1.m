@@ -113,7 +113,7 @@ end
         for k = 1:K
            C5 = zeros(1,DV);
            for a = numel(timespace(k).ga.Loc)+1:numel(timespace(k).nga.Loc) %set of overnight ground arcs
-               C5(Yindex(k,a)) = 1; % YINDEX NOT IN CORRECT YET
+               C5(Yindex(k,a,timespace)) = 1; % YINDEX NOT IN CORRECT YET
            end
            RMP.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',i));
         end
@@ -194,7 +194,7 @@ iter=0;
                     t_cost = [t_cost;farecost(col(recap_p(re),1),col(recap_p(re),2))];
                     
                     % New objective function
-                    A       = RMP.Model.A(:,recap_p(re));
+                    A       = RMP.Model.A(:,2378+recap_p(re));
                     
                     % add a constraint to every L if the leg is used in p.
                     deltasp = 0;
@@ -270,15 +270,15 @@ iter=0;
     % 2. Demand constraint
     check = 0;
     for p = 1:P
-        B = find(col(:,1)==p);
+        Bc = find(col(:,1)==p);
         
-        if sum(primal(B)) > demand(p)
+        if sum(primal(Bc)) > demand(p)
             D = find(p==rowz);
             
             if isempty(D) == 1
                 check = check + 1;
                 C = zeros(1,DV);
-                C(B) = 1;
+                C(Tindex(Bc)) = 1;
                 RMP.addRows(-inf, C, demand(p), sprintf('Demand_%03d',p));
                 rowz = [rowz;p];
             end
@@ -311,15 +311,15 @@ end
 %% Post Processing
 %%
 function out = Yindex(k, a, timespace)
-      GA = size
-%     GA = zeros(5,1);
-%     GA(2) = 358 + 34;
-%     GA(3) = 358 + 349 + 2*34;
-%     GA(4) = 358 + 349 + 353 + 3*34;
-%     GA(5) = 358 + 349 + 353 + 350 + 4*34;
-    for m = 1:k
-        out =   (k - 1) * GA(k)  + a;  % Function given the variable index for each Y(k,a)
+    GA = zeros(1,size(timespace,2));
+    for k  = 1:size(timespace,2)
+        GA(k) = size(timespace(k).ga,1);
     end
+    GA_k    = zeros(size(GA));
+    for k = 2:size(GA,2)
+        GA_k(k) = sum(GA(1:k-1));
+    end
+    out = GA_k(k) + a; 
 end
 
 function out = Findex(k, i)
@@ -328,7 +328,6 @@ function out = Findex(k, i)
 end
 
 function out = Tindex(pr)
-    LF = 208;
     out = 2378 + pr;  % Function given the variable index for each T(p,r)
 end
 
