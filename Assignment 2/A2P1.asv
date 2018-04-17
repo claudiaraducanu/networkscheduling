@@ -82,7 +82,7 @@ end
             end
         end        
         for pr = 1:numel(col(:,1))
-            NameDV (l,:)  = ['T_' num2str(pr,'%06d') ];
+            NameDV (l,:)  = ['T_' num2str(pr,'%03d') ];
             l = l + 1;
         end
         
@@ -149,7 +149,7 @@ end
                end            
                 C4(Yindex(k, idx_on, timespace)) =1;
                 C4(Yindex(k, idx_in, timespace)) =-1;
-                RMP.addRows(0, C4, 0, sprintf('Inandout_%d_%03d',k,n));
+                RMP.addRows(0, C4, 0, sprintf('Inandout_%d_%d',k,n));
             end
         end
     % 5. Fleet size is not exceeded
@@ -158,7 +158,7 @@ end
            GA  = numel(timespace(k).ga.Loc);
            NGA = numel(timespace(k).nga.Loc);
            for a = GA+1:(GA+NGA) %set of overnight ground arcs
-               C5(Yindex(k,a,timespace)) = 1; 
+               C5(Yindex(k,a,timespace)) = 1; % YINDEX NOT IN CORRECT YET
            end
            RMP.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',k));
         end
