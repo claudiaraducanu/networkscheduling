@@ -54,8 +54,8 @@ end
  %%
         %   Create model 
         model                 =   'IFAM';        % name of model
-        RMP                   =    Cplex(model); % define the new model
-        RMP.Model.sense       =   'minimize';
+        IFAM                   =    Cplex(model); % define the new model
+        IFAM.Model.sense       =   'minimize';
         
 
         %   Add the columns
@@ -87,7 +87,7 @@ end
         end
         
         
-        RMP.addCols(obj, [], lb, ub,[],NameDV);
+        IFAM.addCols(obj, [], lb, ub,[],NameDV);
         
    %%  Constraints
    %%
@@ -108,7 +108,7 @@ end
                 C13(Findex(k,i)) = AC.Seats(k);
             end
             C1 = C13 + C11 - C12;
-            RMP.addRows(Q(i), C1, inf, sprintf('Capacity_%2d',i));
+            IFAM.addRows(Q(i), C1, inf, sprintf('Capacity_%2d',i));
         end
     % 2. Capacity constraint (for only 'busflights')
         for i = Lf+1:L
@@ -123,7 +123,7 @@ end
                 end
             end
             C2 = C21 - C22; % 4 busses with 54 seats for each flight
-            RMP.addRows(Q(i)-216, C2, inf, sprintf('Capacity_%2d',i));
+            IFAM.addRows(Q(i)-216, C2, inf, sprintf('Capacity_%2d',i));
         end
         
     % 3. Each flight is operated by 1 aircraft type
@@ -132,7 +132,7 @@ end
             for k = 1:K
                 C3(Findex(k,i)) = 1;
             end
-            RMP.addRows(1, C3, 1, sprintf('Flights_%2d',i));
+            IFAM.addRows(1, C3, 1, sprintf('Flights_%2d',i));
         end
         
     % 4. What goes in, goes out BY CLAUDIA
@@ -149,7 +149,7 @@ end
                end            
                 C4(Yindex(k, idx_on, timespace)) =  1;
                 C4(Yindex(k, idx_in, timespace)) = -1;
-                RMP.addRows(0, C4, 0, sprintf('Inandout_%d_%0003d',k,n));
+                IFAM.addRows(0, C4, 0, sprintf('Inandout_%d_%0003d',k,n));
             end
         end
     % 5. Fleet size is not exceeded
@@ -160,20 +160,20 @@ end
            for a = GA+1:(GA+NGA) %set of overnight ground arcs
                C5(Yindex(k,a,timespace)) = 1; 
            end
-           RMP.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',k));
+           IFAM.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',k));
         end
 
     %%  Execute model 
     %%
-    sol = RMP.solve();
-    RMP.writeModel([model '.lp']);
+    sol = IFAM.solve();
+    IFAM.writeModel([model '.lp']);
     OV = [];
-    OV = [OV;RMP.Solution.objval];
-    primal  = RMP.Solution.x;   
-    dual    = RMP.Solution.dual;
+    OV = [OV;IFAM.Solution.objval];
+    primal  = IFAM.Solution.x;   
+    dual    = IFAM.Solution.dual;
     %RMP.writeModel([model '.lp']);
     
-    Alist = [RMP.Model.A];
+    Alist = [IFAM.Model.A];
 
 %% SUPER BIG LOOP
 %%
@@ -185,7 +185,7 @@ while not_opt_col == 1 || not_opt_row == 1
     disp(['Iteration: ',num2str(titer)]);   
     disp('-------------------------------------------------');
     
-    dual    = RMP.Solution.dual;
+    dual    = IFAM.Solution.dual;
     
     
 %% COLUMN GENERATION
@@ -240,7 +240,7 @@ iter=0;
                     t_cost = [t_cost;farecost(col(recap_p(re),1),col(recap_p(re),2))];
                     
                     % New objective function
-                    A       = RMP.Model.A(:,2378+recap_p(re));
+                    A       = IFAM.Model.A(:,2378+recap_p(re));
                     
                     % add a constraint to every L if the leg is used in p.
                     deltasp = 0;
@@ -263,18 +263,18 @@ iter=0;
                     ub      = [inf];
                     %ctype   = []; 
                     NameDV  = ['T_' num2str(pr,'%04d')];
-                    RMP.addCols(obj,A,lb,ub,[],NameDV);
+                    IFAM.addCols(obj,A,lb,ub,[],NameDV);
 
                 end
             end
     end
     
      
-    RMP.solve();
-    OV = [OV;RMP.Solution.objval];
-    RMP.writeModel([model '.lp']);
+    IFAM.solve();
+    OV = [OV;IFAM.Solution.objval];
+    IFAM.writeModel([model '.lp']);
     
-    dual = RMP.Solution.dual;
+    dual = IFAM.Solution.dual;
     pi   = dual(1:L);                 % dual variables of capacity constraints (slack)
     sigma = zeros(P,1);
     if size(dual) > L
@@ -310,7 +310,7 @@ iter=0;
   
   DV                      = Gk + K*Lf ...       % DV for FAM part
                             + numel(col(:,1));  % DV for PMF part (incl new)
-  primal = RMP.Solution.x;
+  primal = IFAM.Solution.x;
      
         %% Separation Problem
     % 2. Demand constraint
@@ -325,7 +325,7 @@ iter=0;
                 check = check + 1;
                 C = zeros(1,DV);
                 C(Tindex(Bc)) = 1;
-                RMP.addRows(-inf, C, demand(p), sprintf('Demand_%03d',p));
+                IFAM.addRows(-inf, C, demand(p), sprintf('Demand_%03d',p));
                 rowz = [rowz;p];
             end
         end
@@ -334,8 +334,8 @@ iter=0;
     
            %%  Execute model 
     %   Run CPLEX
-    RMP.solve();
-    OV = [OV;RMP.Solution.objval];
+    IFAM.solve();
+    OV = [OV;IFAM.Solution.objval];
 
     
 %     %   Get dual variables
