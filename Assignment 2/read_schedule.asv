@@ -1,4 +1,4 @@
-function [AC,B,timespace] = read_schedule(filename)
+%function [AC,B,timespace] = read_schedule(filename)
 %read_schedule - Read the flight schedule information provided and
 %converts it into a set of nodes and arcs that would represent the
 %time-space network for each aircraft type the airline owns. 
@@ -21,8 +21,8 @@ function [AC,B,timespace] = read_schedule(filename)
 % April 2018;
 % Assignment 2, Network Scheduling
 
-%    clearvars
-%    filename = 'Assignment2.xlsx';
+   clearvars
+   filename = 'Assignment2.xlsx';
 
 %% ------------- BEGIN CODE -----------------------------------------------
 %% Input 
@@ -146,7 +146,7 @@ function [AC,B,timespace] = read_schedule(filename)
     disp(size(timespace(1).ga,1))
     disp('Number of overnight arcs for A330: ') 
     disp(size(timespace(1).nga,1))
-end
+%end
 
 %% ------------- END OF CODE ----------------------------------------------
 

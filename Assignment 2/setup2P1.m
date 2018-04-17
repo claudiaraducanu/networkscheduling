@@ -1,5 +1,5 @@
 function [P, R, L, fare, fare_r, demand, col, delta, Q, farecost, Bpr, ... 
-          recap_p, recap_r, recaprate] = setup2P1(filename)  
+         recap_p, recap_r, recaprate] = setup2P1(filename)  
 
 % This file contains the function to read most of the input file and some
 % initial calculation. 
@@ -30,9 +30,9 @@ function [P, R, L, fare, fare_r, demand, col, delta, Q, farecost, Bpr, ...
 % April 2018;
 % Assignment 2, Network Scheduling
 
-%    clearvars
-%    clear all
-%    filename = 'Assignment2.xlsx';
+%     clearvars
+% %    clear all
+%     filename = 'Assignment2.xlsx';
        %% Read file for network   
    % All dependend on P (itineraries)
     [~, ditinerary.flightnr]    = xlsread(filename,2,'F2:G738');   % flight numbers both legs
@@ -42,7 +42,7 @@ function [P, R, L, fare, fare_r, demand, col, delta, Q, farecost, Bpr, ...
     itinerary.demand            = xlsread(filename,2,'D2:D738'); % demand associated to itineraries
     
    % All dependend on L (flights)
-    [~, dflight.flightnr]       = xlsread(filename,1,'A2:A233'); % flight number 
+    [~, dflight.flightnr]       = xlsread(filename,5,'A2:A233'); % flight number 
     flight.flightnr             = dflight.flightnr;
     
    % All about recapturing
@@ -94,7 +94,7 @@ function [P, R, L, fare, fare_r, demand, col, delta, Q, farecost, Bpr, ...
     delta{738,1} = zeros(L,1);
 
     % The daily unconstrained demand on flight(i): Q
-    Q = zeros(L,1);
+    Q = zeros(L,1); 
     for i = 1:L
         a = zeros(P,1);
         for p = 1:P
@@ -120,8 +120,8 @@ end
 
 % %% Write Bpr file
 %  % Bpr is a P by R matrix containing the recapture rates for the p's that
-%  can be recaptured by r
-%
+%  % can be recaptured by r
+% 
 % ptor = zeros(P);
 % for p = 1:P
 %     for r = 1:P
