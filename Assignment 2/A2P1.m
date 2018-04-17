@@ -34,8 +34,10 @@ rowz = [];
 y_cost = zeros(Gk,1);
 
 % Cost of assigning ac type k to flight i (per K all L are given)
-f_cost = [timespace(1).fl.Cost; timespace(2).fl.Cost; ...
-          timespace(3).fl.Cost; timespace(4).fl.Cost];
+f_cost =[]; 
+for k = 1:K
+    f_cost = [f_cost; timespace(k).fl.Cost;];
+end
 
 % Cost of spilled passengers 
 t_cost = zeros(numel(col(:,1)),1);
@@ -43,6 +45,11 @@ for p = 1:numel(col(:,1))
     t_cost(p) = farecost(col(p,1),col(p,2));  % select only costs you need
 end
 
+
+GA  = zeros(1,size(timespace,2));
+for k  = 1:size(timespace,2)
+    GA(k) = size(timespace(k).gat,1);
+end
 
  %%  Initiate CPLEX model
  %%
@@ -59,9 +66,29 @@ end
 
         obj                     =   [y_cost; f_cost; t_cost] ; % y_ak, f_ik, t_pr
         lb                      =   zeros(DV, 1);   % Lower bounds
-        ub                      =   inf(DV, 1);     % Upper bounds             
+        ub                      =   inf(DV, 1);     % Upper bounds     
         
-        RMP.addCols(obj, [], lb, ub);
+        %% Naming DVs
+        l = 1;                                      % Array with DV names  (OPTIONAL, BUT HELPS READING THE .lp FILE)
+        for k = 1:k
+            for n = 1:GA(k)                         % of the x_{ij} variables
+                NameDV (l,:)  = ['Y_' num2str(k,'%02d') '_' num2str(n,'%02d')];
+                l = l + 1;
+            end
+        end
+        for i = 1:Lf
+            for k = 1:K                          % of the w_{ij} variables
+                NameDV (l,:)  = ['F_' num2str(i,'%02d') '_' num2str(k,'%02d')];
+                l = l + 1;
+            end
+        end        
+        for pr = 1:numel(col(:,1))
+            NameDV (l,:)  = ['T_' num2str(pr,'%04d')];
+            l = l + 1;
+        end
+        
+        
+        RMP.addCols(obj, [], lb, ub,[],NameDV);
         
    %%  Constraints
    %%
@@ -236,8 +263,8 @@ iter=0;
                     lb      = [0];
                     ub      = [inf];
                     %ctype   = []; 
-
-                    RMP.addCols(obj,A,lb,ub);
+                    NameDV  = ['T_' num2str(pr,'%04d')];
+                    RMP.addCols(obj,A,lb,ub,[],NameDV);
 
                 end
             end
