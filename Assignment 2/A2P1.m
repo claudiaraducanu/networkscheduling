@@ -147,9 +147,9 @@ end
                for ii = 1:size(idx_ifl,1)
                    C4(Findex(k,idx_ifl(ii,1))) = -1;
                end            
-                C4(Yindex(k, idx_on, timespace)) =1;
-                C4(Yindex(k, idx_in, timespace)) =-1;
-                RMP.addRows(0, C4, 0, sprintf('Inandout_%d_%03d',k,n));
+                C4(Yindex(k, idx_on, timespace)) =  1;
+                C4(Yindex(k, idx_in, timespace)) = -1;
+                RMP.addRows(0, C4, 0, sprintf('Inandout_%d_%0003d',k,n));
             end
         end
     % 5. Fleet size is not exceeded
@@ -358,14 +358,14 @@ end
 %%
 function out = Yindex(k, a, timespace)
     GA  = zeros(1,size(timespace,2));
-    for k  = 1:size(timespace,2)
-        GA(k) = size(timespace(k).gat,1);
+    for kk  = 1:size(timespace,2)
+        GA(kk) = size(timespace(kk).gat,1);
     end
     GA_k    = zeros(size(GA));   
-    for k = 2:size(GA,2)
-        GA_k(k) = sum(GA(1:k-1));
+    for kk = 2:size(GA,2)
+        GA_k(kk) = sum(GA(1:kk-1));
     end
-    out = GA_k(k) + a; 
+    out = GA_k(k) + a;
 end
 
 function out = Findex(k, i)
