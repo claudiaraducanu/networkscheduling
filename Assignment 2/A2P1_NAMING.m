@@ -59,9 +59,28 @@ end
 
         obj                     =   [y_cost; f_cost; t_cost] ; % y_ak, f_ik, t_pr
         lb                      =   zeros(DV, 1);   % Lower bounds
-        ub                      =   inf(DV, 1);     % Upper bounds             
+        ub                      =   inf(DV, 1);     % Upper bounds   
+        ctype                   =   [];
         
-        RMP.addCols(obj, [], lb, ub);
+        l = 1;                                      % Array with DV names
+        for k = 1:K
+            for a = 1:(size(timespace(k).ga,1) + size(timespace(k).nga,1))
+                NameDV (l,:)  = ['Y_' num2str(k,'%02d') ',' num2str(a,'%04d') '_' num2str(0,'%02d')];
+                l = l + 1;
+            end
+        end
+        for k = 1:K
+            for i = 1:Lf                          % of the y_{ij} variables
+                NameDV (l,:)  = ['F_' num2str(k,'%02d') ',' num2str(i,'%04d') '_' num2str(0,'%02d')];
+                l = l + 1;
+            end
+        end
+        for pr = 1:numel(col(:,1))
+            NameDV (l,:)  = ['T_' num2str(0,'%02d') ',' num2str(0,'%02d') '_' num2str(pr,'%04d')];
+            l = l + 1;
+        end
+        
+        RMP.addCols(obj, [], lb, ub, ctype, NameDV);
         
    %%  Constraints
    %%
@@ -96,8 +115,8 @@ end
                     C22(Tindex(pr)) = Bpr(col(pr,1),col(pr,2)); 
                 end
             end
-            C2 = 4*54 + C21 - C22; % 4 busses with 54 seats for each flight
-            RMP.addRows(Q(i), C2, inf, sprintf('Capacity_%2d',i));
+            C2 = C21 - C22; % 4 busses with 54 seats for each flight
+            RMP.addRows(Q(i)-216, C2, inf, sprintf('Capacity_%2d',i));
         end
         
     % 3. Each flight is operated by 1 aircraft type
@@ -123,7 +142,7 @@ end
                end            
                 C4(Yindex(k, idx_on, timespace)) =1;
                 C4(Yindex(k, idx_in, timespace)) =-1;
-                RMP.addRows(0, C4, 0, sprintf('Inandout_%d_%2d',k,n));
+                RMP.addRows(0, C4, 0, sprintf('Inandout_%d_%d',k,n));
             end
         end
     % 5. Fleet size is not exceeded
