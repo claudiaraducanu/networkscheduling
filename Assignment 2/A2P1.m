@@ -2,7 +2,7 @@
 % Claudia Raducanu and Luka Van de Sype
 addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 % clc
- clearvars
+clearvars
 % clear all
 
 %%  Determine input
@@ -86,8 +86,10 @@ end
             l = l + 1;
         end
         
+        %ctype      = char(ones(1, (DV)) * ('I'));
+        ctype       = [];
         
-        IFAM.addCols(obj, [], lb, ub,[],NameDV);
+        IFAM.addCols(obj, [], lb, ub, ctype, NameDV);
         
    %%  Constraints
    %%
@@ -96,24 +98,32 @@ end
             C11 = zeros(1,DV); % Spilled pax from p
             C12 = zeros(1,DV); % Recaptured pax from r to p
             C13 = zeros(1,DV); % Capacity for each flight leg
+            
             for pr = 1:numel(col(:,1))
+                % Activated the spilled passengers
                 if delta{col(pr,1),1}(i) ~= 0 
                     C11(Tindex(pr))= 1;
                 end
+                % Activate the recaptured passengers in p (use Bpr)
                 if delta{col(pr,2),1}(i) ~= 0 && ismember(col(pr,2), col(:,1))
                     C12(Tindex(pr)) = Bpr(col(pr,1),col(pr,2)); 
                 end
             end
+            % Calculate/Select the capacity for this constraint
             for k = 1:K
                 C13(Findex(k,i)) = AC.Seats(k);
             end
+            % Add all together and add row to cplex
             C1 = C13 + C11 - C12;
-            IFAM.addRows(Q(i), C1, inf, sprintf('Capacity_%2d',i));
+            IFAM.addRows(Q(i), C1, inf, sprintf('Capacity_%d',i));
         end
+        
+        
     % 2. Capacity constraint (for only 'busflights')
         for i = Lf+1:L
             C21 = zeros(1,DV); % Spilled pax from p
             C22 = zeros(1,DV); % Recaptured pax from r to p
+            
             for pr = 1:numel(col(:,1))
                 if delta{col(pr,1),1}(i) ~= 0 
                     C21(Tindex(pr))= 1;
@@ -123,7 +133,7 @@ end
                 end
             end
             C2 = C21 - C22; % 4 busses with 54 seats for each flight
-            IFAM.addRows(Q(i)-216, C2, inf, sprintf('Capacity_%2d',i));
+            IFAM.addRows((Q(i)-216), C2, inf, sprintf('Capacitie_%d',i));
         end
         
     % 3. Each flight is operated by 1 aircraft type
@@ -132,7 +142,7 @@ end
             for k = 1:K
                 C3(Findex(k,i)) = 1;
             end
-            IFAM.addRows(1, C3, 1, sprintf('Flights_%2d',i));
+            IFAM.addRows(1, C3, 1, sprintf('Flights_%03d',i));
         end
         
     % 4. What goes in, goes out BY CLAUDIA
@@ -353,6 +363,11 @@ iter=0;
    end
     
 end
+
+
+
+
+
 
 %% Post Processing
 %%
