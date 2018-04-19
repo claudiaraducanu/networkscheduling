@@ -1992,3 +1992,148 @@ Dual simplex solved model.
 
 Log for '' Clone_1 (V12.7.1.0) Thu Apr 19 12:18:15 2018
 
+
+Log for 'IFAM' Clone_1 (V12.7.1.0) Thu Apr 19 14:07:25 2018
+
+Tried aggregator 0 times.
+No LP presolve or aggregator reductions.
+Presolve time = 0.00 sec. (0.51 ticks)
+Parallel mode: using up to 6 threads for barrier.
+Number of nonzeros in lower triangle of A*A' = 5545
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.00 sec. (3.22 ticks)
+Barrier time = 0.02 sec. (4.26 ticks)
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_1 (V12.7.1.0) Thu Apr 19 14:08:20 2018
+
+Tried aggregator 0 times.
+No LP presolve or aggregator reductions.
+Presolve time = 0.02 sec. (0.51 ticks)
+Parallel mode: using up to 6 threads for barrier.
+Number of nonzeros in lower triangle of A*A' = 5545
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.00 sec. (3.81 ticks)
+Barrier time = 0.00 sec. (4.86 ticks)
+
+Dual simplex solved model.
+
+
+Log for '' Clone_1 (V12.7.1.0) Thu Apr 19 14:08:21 2018
+
+
+Log for 'IFAM' Clone_1 (V12.7.1.0) Thu Apr 19 14:17:49 2018
+
+Tried aggregator 0 times.
+No LP presolve or aggregator reductions.
+Presolve time = 0.00 sec. (0.51 ticks)
+Parallel mode: using up to 6 threads for barrier.
+Number of nonzeros in lower triangle of A*A' = 5545
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.00 sec. (3.26 ticks)
+Barrier time = 0.00 sec. (4.31 ticks)
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_1 (V12.7.1.0) Thu Apr 19 14:17:49 2018
+
+Tried aggregator 0 times.
+Reduced presolve eliminated 9 rows and 194 columns.
+Reduced LP has 1981 rows, 2961 columns, and 7707 nonzeros.
+Presolve time = 0.00 sec. (1.14 ticks)
+Parallel mode: using up to 6 threads for barrier.
+Number of nonzeros in lower triangle of A*A' = 6708
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.02 sec. (5.29 ticks)
+Barrier time = 0.02 sec. (7.02 ticks)
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_1 (V12.7.1.0) Thu Apr 19 14:17:49 2018
+
+Tried aggregator 0 times.
+Reduced presolve eliminated 9 rows and 194 columns.
+Reduced LP has 1981 rows, 2963 columns, and 7715 nonzeros.
+Presolve time = 0.00 sec. (1.14 ticks)
+Barrier time = 0.00 sec. (1.22 ticks)
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_1 (V12.7.1.0) Thu Apr 19 14:17:49 2018
+
+Presolve time = 0.00 sec. (0.82 ticks)
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_1 (V12.7.1.0) Thu Apr 19 14:17:49 2018
+
+Presolve time = 0.00 sec. (0.82 ticks)
+
+Dual simplex solved model.
+
+
+Log for '' Clone_1 (V12.7.1.0) Thu Apr 19 14:17:49 2018
+
+
+Log for 'IFAM' Clone_1 (V12.7.1.0) Thu Apr 19 14:31:13 2018
+
+Tried aggregator 0 times.
+No LP presolve or aggregator reductions.
+Presolve time = 0.02 sec. (0.51 ticks)
+Parallel mode: using up to 6 threads for barrier.
+Number of nonzeros in lower triangle of A*A' = 5545
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.00 sec. (3.26 ticks)
+Barrier time = 0.00 sec. (4.31 ticks)
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_1 (V12.7.1.0) Thu Apr 19 14:31:13 2018
+
+Tried aggregator 0 times.
+Reduced presolve eliminated 9 rows and 194 columns.
+Reduced LP has 1981 rows, 2961 columns, and 7707 nonzeros.
+Presolve time = 0.00 sec. (1.14 ticks)
+Parallel mode: using up to 6 threads for barrier.
+Number of nonzeros in lower triangle of A*A' = 6708
+Using Approximate Minimum Degree ordering
+Total time for automatic ordering = 0.00 sec. (2.88 ticks)
+Barrier time = 0.02 sec. (4.61 ticks)
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_1 (V12.7.1.0) Thu Apr 19 14:31:13 2018
+
+Tried aggregator 0 times.
+Reduced presolve eliminated 9 rows and 194 columns.
+Reduced LP has 1981 rows, 2963 columns, and 7715 nonzeros.
+Presolve time = 0.00 sec. (1.14 ticks)
+Barrier time = 0.00 sec. (1.22 ticks)
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_1 (V12.7.1.0) Thu Apr 19 14:31:13 2018
+
+Presolve time = 0.00 sec. (0.47 ticks)
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_1 (V12.7.1.0) Thu Apr 19 14:31:13 2018
+
+Presolve time = 0.00 sec. (0.82 ticks)
+
+Dual simplex solved model.
+
+
+Log for '' Clone_1 (V12.7.1.0) Thu Apr 19 14:31:14 2018
+

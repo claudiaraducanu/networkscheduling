@@ -53,9 +53,14 @@ end
  %%  Initiate CPLEX model
  %%
         %   Create model 
-        model                 =   'IFAM';        % name of model
-        IFAM                   =    Cplex(model); % define the new model
+        model                  =   'IFAM';        % name of model
+        IFAM                   =   Cplex(model); % define the new model
         IFAM.Model.sense       =   'minimize';
+        
+        % second model?
+        model2                 =   'MILP';
+        MILP                   =   Cplex(model2);
+        MILP.Model.sense       =   'minimize';
         
 
         %   Add the columns
@@ -86,10 +91,13 @@ end
             l = l + 1;
         end
         
-        %ctype      = char(ones(1, (DV)) * ('I'));
         ctype       = [];
+        ctype2      = char(ones(1, (DV)) * ('I')); % for the MILP
+        
+        % Add the Columns
         
         IFAM.addCols(obj, [], lb, ub, ctype, NameDV);
+        MILP.addCols(obj, [], lb, ub, ctype2, NameDV);
         
    %%  Constraints
    %%
@@ -116,6 +124,7 @@ end
             % Add all together and add row to cplex
             C1 = C13 + C11 - C12;
             IFAM.addRows(Q(i), C1, inf, sprintf('Capacity_%d',i));
+            MILP.addRows(Q(i), C1, inf, sprintf('Capacity_%d',i));
         end
         
         
@@ -134,6 +143,7 @@ end
             end
             C2 = C21 - C22; % 4 busses with 54 seats for each flight
             IFAM.addRows((Q(i)-216), C2, inf, sprintf('Capacitie_%d',i));
+            MILP.addRows((Q(i)-216), C2, inf, sprintf('Capacitie_%d',i));
         end
         
     % 3. Each flight is operated by 1 aircraft type
@@ -143,6 +153,7 @@ end
                 C3(Findex(k,i)) = 1;
             end
             IFAM.addRows(1, C3, 1, sprintf('Flights_%03d',i));
+            MILP.addRows(1, C3, 1, sprintf('Flights_%03d',i));
         end
         
     % 4. What goes in, goes out BY CLAUDIA
@@ -160,6 +171,7 @@ end
                 C4(Yindex(k, idx_on, timespace)) =  1;
                 C4(Yindex(k, idx_in, timespace)) = -1;
                 IFAM.addRows(0, C4, 0, sprintf('Inandout_%d_%0003d',k,n));
+                MILP.addRows(0, C4, 0, sprintf('Inandout_%d_%0003d',k,n));
             end
         end
     % 5. Fleet size is not exceeded
@@ -171,6 +183,7 @@ end
                C5(Yindex(k,a,timespace)) = 1; 
            end
            IFAM.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',k));
+           MILP.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',k));
         end
 
     %%  Execute model 
@@ -272,10 +285,12 @@ iter=0;
                     lb      = [0];
                     ub      = [inf];
                     NameDV  = ['T_' num2str(pr,'%04d')];
-                    ctype      = char(ones(1, (1)) * ('I'));
-                    %ctype      = 1*'I';
-                    %ctype       = [];
+                    
+                    % ctype and adding Cols
+                    ctype       = [];
+                    ctype2     = char(ones(1, (1)) * ('I'));
                     IFAM.addCols(obj,A,lb,ub,ctype,NameDV);
+                    MILP.addCols(obj,A,lb,ub,ctype2,NameDV);
 
                 end
             end
@@ -338,6 +353,7 @@ iter=0;
                 C = zeros(1,DV);
                 C(Tindex(Bc)) = 1;
                 IFAM.addRows(-inf, C, demand(p), sprintf('Demand_%03d',p));
+                MILP.addRows(-inf, C, demand(p), sprintf('Demand_%03d',p));
                 rowz = [rowz;p];
             end
         end
@@ -367,9 +383,9 @@ iter=0;
 end
 
 
-
-
-
+% SHOULD MILP BE HERE? HOW?
+MILP.solve();
+MILP.writeModel([model2 '.lp']);
 
 %% Post Processing
 %%
