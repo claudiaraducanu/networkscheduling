@@ -387,6 +387,9 @@ end
 MILP.solve();
 MILP.writeModel([model2 '.lp']);
 
+Final = size(B,1)*4500 + MILP.Solution.objval ;
+Final
+
 %% Post Processing
 %%
 function out = Yindex(k, a, timespace)
