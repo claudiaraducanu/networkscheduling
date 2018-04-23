@@ -407,7 +407,11 @@ disp(Final)
         n = n +Lf;
         p = p +Lf;
     end
-
+    %% Export to .txt
+    % Flights operated by B737-700
+    writetable(solution(3).fl,'B737.txt','Delimiter',' ')  
+    % Flights operated by B737-800
+    writetable(solution(4).fl,'B738.txt','Delimiter',' ')  
 %%
 function out = Yindex(k, a, timespace)
     GA  = zeros(1,size(timespace,2));
