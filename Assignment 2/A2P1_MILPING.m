@@ -1,6 +1,6 @@
 %%  Initialization
 % Claudia Raducanu and Luka Van de Sype
-addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
+%addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 % clc
 clearvars
 % clear all
@@ -15,8 +15,8 @@ input      =  'Assignment2.xlsx';
 [AC,B,timespace] = read_schedule(input);
 
 % More variables
-K = 4;      % set of fleet types
-Lf = 208;   % set of aircraft flights (not going by bus)
+K  = size(AC,1);                % set of AIRCRAFT types
+Lf = size(timespace(1).fl,1);   % set of aircraft flights (not going by bus)
 
 GA  = zeros(1,size(timespace,2));
 for k  = 1:size(timespace,2)
@@ -177,9 +177,9 @@ end
     % 5. Fleet size is not exceeded
         for k = 1:K
            C5 = zeros(1,DV);
-           GA  = numel(timespace(k).ga.Loc);
+           G  = numel(timespace(k).ga.Loc);
            NGA = numel(timespace(k).nga.Loc);
-           for a = GA+1:(GA+NGA) %set of overnight ground arcs
+           for a = G+1:(G+NGA) %set of overnight ground arcs
                C5(Yindex(k,a,timespace)) = 1; 
            end
            IFAM.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',k));
@@ -282,8 +282,8 @@ iter=0;
                     %Alist   = [Alist,A];
                     
                     obj     = farecost(recap_p(re),recap_r(re));
-                    lb      = [0];
-                    ub      = [inf];
+                    lb      = 0;
+                    ub      = inf;
                     NameDV  = ['T_' num2str(pr,'%04d')];
                     
                     % ctype and adding Cols
@@ -382,15 +382,32 @@ iter=0;
     
 end
 
-
 % SHOULD MILP BE HERE? HOW?
 MILP.solve();
 MILP.writeModel([model2 '.lp']);
 
 Final = size(B,1)*4500 + MILP.Solution.objval ;
-Final
+disp(Final)
 
-%% Post Processing
+%% Post Processing 
+    for kk = 2:(size(GA,2)+1)
+        ga_k(kk) = sum(GA(1:kk-1));%#ok<SAGROW>
+    end
+    
+    for k = 1:K
+        solution(k).groundarc          = MILP.Solution.x(ga_k(k)+1:ga_k(k+1)); %#ok<SAGROW>
+        solution(k).overnight          = solution(k).groundarc(end-size(timespace(k).nga,1)+1:end);
+        ac_verif(k)                    = sum(solution(k).overnight);
+    end
+
+    n  = Gk;
+    p  = n + Lf;
+    for k = 1:K
+        solution(k).fl                 = timespace(k).fl(logical(MILP.Solution.x(n+1:p)),:);
+        n = n +Lf;
+        p = p +Lf;
+    end
+
 %%
 function out = Yindex(k, a, timespace)
     GA  = zeros(1,size(timespace,2));

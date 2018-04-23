@@ -46,9 +46,9 @@ function [P, R, L, fare, fare_r, demand, col, delta, Q, farecost, Bpr, ...
     flight.flightnr             = dflight.flightnr;
     
    % All about recapturing
-    recapture.rate = xlsread(filename,3,'C2:C300'); % recapture rate associated to some arcs
-    recapture.p   = xlsread(filename,3,'G2:G300'); % recaptured from path p
-    recapture.r   = xlsread(filename,3,'H2:H300'); % recaptured to path r
+    recapture.rate              = xlsread(filename,3,'C2:C300'); % recapture rate associated to some arcs
+    recapture.p                 = xlsread(filename,3,'G2:G300'); % recaptured from path p
+    recapture.r                 = xlsread(filename,3,'H2:H300'); % recaptured to path r
 
 
         %% Input
