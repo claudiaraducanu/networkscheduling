@@ -25,6 +25,8 @@ end
 Gk = sum(GA);
 
 
+
+
 % Loop stoppers
 not_opt_col = 1;
 not_opt_row = 1;
@@ -192,7 +194,6 @@ end
     IFAM.writeModel([model '.lp']);
     OV = [];
     OV = [OV;IFAM.Solution.objval];
-    primal  = IFAM.Solution.x;   
     dual    = IFAM.Solution.dual;
     %RMP.writeModel([model '.lp']);
     
@@ -284,7 +285,7 @@ iter=0;
                     obj     = farecost(recap_p(re),recap_r(re));
                     lb      = 0;
                     ub      = inf;
-                    NameDV  = ['T_' num2str(recap_p(re),recap_r(re),'%04d')];
+                    NameDV  = ['T_' num2str(recap_p(re)),'_' num2str(recap_r(re))];
                     
                     % ctype and adding Cols
                     ctype       = [];
@@ -337,7 +338,7 @@ iter=0;
   
   DV                      = Gk + K*Lf ...       % DV for FAM part
                             + numel(col(:,1));  % DV for PMF part (incl new)
-  primal = IFAM.Solution.x;
+  primal = IFAM.Solution.x(Gk+Lf*4+1:end);
      
         %% Separation Problem
     % 2. Demand constraint
@@ -401,11 +402,11 @@ disp(Final)
     end
 
     n  = Gk;
-    p  = n + Lf;
+    cp  = n + Lf;
     for k = 1:K
-        solution(k).fl                 = timespace(k).fl(logical(MILP.Solution.x(n+1:p)),:);
+        solution(k).fl                 = timespace(k).fl(logical(MILP.Solution.x(n+1:cp)),:);
         n = n +Lf;
-        p = p +Lf;
+        cp = cp +Lf;
     end
     %% Export to .txt
     % Flights operated by B737-700

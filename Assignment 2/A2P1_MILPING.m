@@ -1,6 +1,6 @@
 %%  Initialization
 % Claudia Raducanu and Luka Van de Sype
-%addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
+addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 % clc
 clearvars
 % clear all
@@ -23,6 +23,8 @@ for k  = 1:size(timespace,2)
     GA(1,k) = size(timespace(k).gat,1);
 end
 Gk = sum(GA);
+
+
 
 
 % Loop stoppers
@@ -192,7 +194,6 @@ end
     IFAM.writeModel([model '.lp']);
     OV = [];
     OV = [OV;IFAM.Solution.objval];
-    primal  = IFAM.Solution.x;   
     dual    = IFAM.Solution.dual;
     %RMP.writeModel([model '.lp']);
     
@@ -337,7 +338,7 @@ iter=0;
   
   DV                      = Gk + K*Lf ...       % DV for FAM part
                             + numel(col(:,1));  % DV for PMF part (incl new)
-  primal = IFAM.Solution.x;
+  primal = IFAM.Solution.x(Gk+Lf*4+1:end);
      
         %% Separation Problem
     % 2. Demand constraint
