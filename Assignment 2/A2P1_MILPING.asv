@@ -284,7 +284,7 @@ iter=0;
                     obj     = farecost(recap_p(re),recap_r(re));
                     lb      = 0;
                     ub      = inf;
-                    NameDV  = ['T_' num2str(recap_p(re)),'_' num2str(recap_r(re))];
+                    NameDV  = ['T_' num2str(recap_p(re),recap_r(re),'%04d')];
                     
                     % ctype and adding Cols
                     ctype       = [];
