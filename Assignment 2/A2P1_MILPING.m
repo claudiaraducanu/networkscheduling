@@ -1,6 +1,6 @@
 %%  Initialization
 % Claudia Raducanu and Luka Van de Sype
-addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
+%addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 % clc
 clearvars
 % clear all
@@ -401,11 +401,11 @@ disp(Final)
     end
 
     n  = Gk;
-    p  = n + Lf;
+    cp  = n + Lf;
     for k = 1:K
-        solution(k).fl                 = timespace(k).fl(logical(MILP.Solution.x(n+1:p)),:);
+        solution(k).fl                 = timespace(k).fl(logical(MILP.Solution.x(n+1:cp)),:);
         n = n +Lf;
-        p = p +Lf;
+        cp = cp +Lf;
     end
     %% Export to .txt
     % Flights operated by B737-700

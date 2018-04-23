@@ -4,7 +4,7 @@
 tic
 %function Robin&Bert()
 %% Initialization
-addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio128\cplex\matlab\x64_win64');   
+%addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio128\cplex\matlab\x64_win64');   
 clc
 clearvars
 close all
