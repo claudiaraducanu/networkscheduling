@@ -468,11 +468,22 @@ spilled_am = [];
 for spill = 1:737
     if int64(MILP.Solution.x(Gk+Lf*4+spill)) ~= 0
         spilled_am = [spilled_am; MILP.Solution.x(Gk+Lf*4+spill)];
-        spilled_it = [spilled_it; spill];
+        spilled_it = [spilled_it, spill];
     end
 end
 spillage = [spilled_it, spilled_am];
-spillage = array2table(spillage,'VariableNames',{'Itinerary','Pax'});
+
+spilled_it = [];%int64( find(MILP.Solution.x(Gk+Lf*4+1:Gk+Lf*4+737)) );
+spilled_am = [];
+for spill = 1:737
+    if int64(MILP.Solution.x(Gk+Lf*4+spill)) ~= 0
+        spilled_am = [spilled_am; MILP.Solution.x(Gk+Lf*4+spill)];
+        spilled_it = [spilled_it, spill];
+    end
+end
+spillage = [spilled_it, spilled_am];
+
+spillage = array2table(spill,'VariableNames',{'Itinerary','Pax'});
 
 spilled_tot = sum(MILP.Solution.x(Gk+Lf*4+1:Gk+Lf*4+737));
 
