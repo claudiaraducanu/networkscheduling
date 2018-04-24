@@ -14,6 +14,8 @@ input      =  'Assignment2.xlsx';
           recap_p, recap_r, recaprate] = setup2P1(input);
 [AC,B,timespace] = read_schedule(input);
 
+tic
+
 % More variables
 K  = size(AC,1);                % set of AIRCRAFT types
 Lf = size(timespace(1).fl,1);   % set of aircraft flights (not going by bus)
@@ -387,6 +389,8 @@ end
 MILP.solve();
 MILP.writeModel([model2 '.lp']);
 
+OV = [OV;MILP.Solution.objval];
+
 % NEW ROW, final checking
   primal = MILP.Solution.x(Gk+Lf*4+1:end);
      
@@ -413,7 +417,10 @@ end
 MILP.solve();
 MILP.writeModel([model2 '.lp']);
 
+OV = [OV;MILP.Solution.objval];
+
 Final = size(B,1)*4500 + MILP.Solution.objval ;
+OV_Final = OV + size(B,1)*4500;
 disp(Final)
 
 
@@ -462,6 +469,7 @@ function out = Tindex(pr)
     out = 2378 + pr;  % Function given the variable index for each T(p,r)
 end
 
+toc
 
 
 
