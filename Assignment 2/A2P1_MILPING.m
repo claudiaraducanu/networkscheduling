@@ -196,7 +196,7 @@ end
     OV = [OV;IFAM.Solution.objval];
     dual    = IFAM.Solution.dual;
     %RMP.writeModel([model '.lp']);
-    
+    constraints = size(IFAM.Model.A,1);
     Alist = [IFAM.Model.A];
 
 %% SUPER BIG LOOP
@@ -228,9 +228,9 @@ iter=0;
    % Get dual variables 
     pi   = dual(1:L);                 % dual variables of capacity constraints (slack)
     sigma = zeros(P,1);
-    if size(dual) > L
+    if size(dual) > constraints
         for ro = 1:numel(rowz)
-            sigma(rowz(ro)) = dual(L+ro);
+            sigma(rowz(ro)) = dual(constraints+ro);
         end
     end
     
@@ -387,8 +387,35 @@ end
 MILP.solve();
 MILP.writeModel([model2 '.lp']);
 
+% NEW ROW, final checking
+  primal = MILP.Solution.x(Gk+Lf*4+1:end);
+     
+        %% Separation Problem
+    % 2. Demand constraint
+for p = 1:P
+    Bc = find(col(:,1)==p);
+
+    if sum(primal(Bc)) > demand(p)
+        D = find(p==rowz);
+
+        if isempty(D) == 1
+            luka = 3;
+            disp(luka)
+            C = zeros(1,DV);
+            C(Tindex(Bc)) = 1;
+            %IFAM.addRows(-inf, C, demand(p), sprintf('Demand_%03d',p));
+            MILP.addRows(-inf, C, demand(p), sprintf('Demand_%03d',p));
+            rowz = [rowz;p];
+        end
+    end
+end 
+    
+MILP.solve();
+MILP.writeModel([model2 '.lp']);
+
 Final = size(B,1)*4500 + MILP.Solution.objval ;
 disp(Final)
+
 
 %% Post Processing 
     for kk = 2:(size(GA,2)+1)
