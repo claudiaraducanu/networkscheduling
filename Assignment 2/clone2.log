@@ -10653,3 +10653,468 @@ Log for 'MILP' Clone_2 (V12.7.1.0) Tue Apr 24 14:20:49 2018
 
 Log for '' Clone_2 (V12.7.1.0) Tue Apr 24 14:20:49 2018
 
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:25 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =          3008.656245
+Iteration:   132    Scaled infeas =          2915.244220
+Iteration:   228    Scaled infeas =          2898.904348
+Iteration:   316    Scaled infeas =          2890.321493
+Iteration:   399    Scaled infeas =          2880.678309
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:25 2018
+
+Using devex.
+
+Iteration log . . .
+Iteration:     1    Objective     =       2555237.817497
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:25 2018
+
+Using devex.
+
+Iteration log . . .
+Iteration:     1    Objective     =       2538173.466734
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:25 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:26 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =          2827.251464
+Iteration:     2    Scaled infeas =          2339.206147
+Switched to devex.
+Iteration:   134    Objective     =       2776252.532962
+Iteration:   264    Objective     =       2585720.672883
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:26 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =          1710.113333
+Iteration:     3    Scaled infeas =           684.243333
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:26 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =          1283.011559
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:26 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =           904.415520
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:26 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =           693.132343
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:26 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =           465.649374
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:26 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =           294.309999
+Switched to devex.
+Iteration:    20    Objective     =       2616975.408925
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:26 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =            87.863996
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:26 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =            14.097933
+Switched to devex.
+Iteration:     6    Objective     =       2603614.776589
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:26 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =             0.000000
+Switched to devex.
+Iteration:     2    Objective     =       2601937.458983
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:26 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:26 2018
+
+Using devex.
+
+Iteration log . . .
+Iteration:     1    Objective     =       2601909.749808
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:27 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:27 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:27 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =            23.900000
+Switched to devex.
+Iteration:     4    Objective     =       2601524.422578
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:27 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =             1.179999
+Switched to devex.
+Iteration:     3    Objective     =       2601944.116105
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:27 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:27 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:27 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:27 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for '' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:27 2018
+
+
+Log for 'MILP' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:27 2018
+
+
+Log for '' Clone_2 (V12.7.1.0) Wed Apr 25 16:50:27 2018
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:13 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =          3008.656245
+Iteration:   132    Scaled infeas =          2915.244220
+Iteration:   228    Scaled infeas =          2898.904348
+Iteration:   316    Scaled infeas =          2890.321493
+Iteration:   399    Scaled infeas =          2880.678309
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:14 2018
+
+Using devex.
+
+Iteration log . . .
+Iteration:     1    Objective     =       2555237.817497
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:14 2018
+
+Using devex.
+
+Iteration log . . .
+Iteration:     1    Objective     =       2538173.466734
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:14 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:14 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =          2827.251464
+Iteration:     2    Scaled infeas =          2339.206147
+Switched to devex.
+Iteration:   134    Objective     =       2776252.532962
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:14 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =          1710.113333
+Iteration:     3    Scaled infeas =           684.243333
+Switched to devex.
+Iteration:   102    Objective     =       2635048.636515
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:14 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =          1283.011559
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:14 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =           904.415520
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:14 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =           693.132343
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:14 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =           465.649374
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:14 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =           294.309999
+Switched to devex.
+Iteration:    20    Objective     =       2616975.408925
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =            87.863996
+Switched to devex.
+Iteration:    35    Objective     =       2607492.193535
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =            14.097933
+Switched to devex.
+Iteration:     6    Objective     =       2603614.776589
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =             0.000000
+Switched to devex.
+Iteration:     2    Objective     =       2601937.458983
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+Using devex.
+
+Iteration log . . .
+Iteration:     1    Objective     =       2601909.749808
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =            23.900000
+Switched to devex.
+Iteration:     4    Objective     =       2601524.422578
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+
+Iteration log . . .
+Iteration:     1    Scaled infeas =             1.179999
+Switched to devex.
+Iteration:     3    Objective     =       2601944.116105
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for 'IFAM' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+Using devex.
+
+Dual simplex solved model.
+
+
+Log for '' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:15 2018
+
+
+Log for 'MILP' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:16 2018
+
+
+Log for '' Clone_2 (V12.7.1.0) Wed Apr 25 17:12:16 2018
+
