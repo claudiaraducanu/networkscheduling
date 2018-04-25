@@ -1,4 +1,4 @@
-function [AC,B,timespace] = read_schedule(filename)
+function [AC,B,timespace,count_time] = read_schedule(filename)
 %read_schedule - Read the flight schedule information provided and
 %converts it into a set of nodes and arcs that would represent the
 %time-space network for each aircraft type the airline owns. 
@@ -21,8 +21,8 @@ function [AC,B,timespace] = read_schedule(filename)
 % April 2018;
 % Assignment 2, Network Scheduling
 
-     clearvars
-     filename = 'Assignment2.xlsx';
+%     clearvars
+%     filename = 'Assignment2.xlsx';
 
 %% ------------- BEGIN CODE -----------------------------------------------
 %% Input 
@@ -66,16 +66,20 @@ function [AC,B,timespace] = read_schedule(filename)
     AC = cell2table(AC,'VariableNames',varnames);
 
     K  = size(AC,1); % The total number of aircraft types
-
+%% Find airports in time-space network    
+    % If original approach determine the locations ( airports) in the time 
+    % space networks
+    
+    a  = unique(schedule.ORG);        % airport names
+    A         = size(a,1);            % number of airports  
 %% L: Flight arcs for each aircraft type k 
 
     L        = size(schedule.ORG,1); % number of flight arcs
-    a        = cell(K,1); % airports in time-space network for aircraft type k
     
     for k = 1:K
         timespace(k).fl         = [schedule(:,1:5) schedule(:,5+k)]; 
         % the flight arc ends at the turn around time
-        timespace(k).fl.Arrival = timespace(k).fl.Arrival + AC.TAT(k); 
+        timespace(k).fl.Arrival = timespace(k).fl.Arrival + AC.TAT(k);
         idx = find(timespace(k).fl.Arrival >= 1440);
         timespace(k).fl.Arrival(idx) = timespace(k).fl.Arrival(idx) - 1440; 
         timespace(k).fl.Properties.VariableNames{end} = 'Cost'; 
@@ -86,12 +90,7 @@ function [AC,B,timespace] = read_schedule(filename)
 %     writetable(B,filename,'Sheet',5,'Range','A210','WriteVariableNames',false)
    
          
-%% Find airports in time-space network    
-    % If original approach determine the locations ( airports) in the time 
-    % space networks
-    
-    a  = unique(schedule.ORG);        % airport names
-    A         = size(a,1);            % number of airports        
+      
     
 
 %% Time space network for each aircraft type k
@@ -103,15 +102,15 @@ function [AC,B,timespace] = read_schedule(filename)
         for j = 1:A
             % index of nodes departing and arriving at airport j 
             % (there may be duplicate nodes at this point because multiple 
-            % flight arcs can end at one node)        
-            idx            = [strcmp(timespace(k).fl.ORG, a(j)) ...
-                            strcmp(timespace(k).fl.DEST, a(j))] ; 
-            
+            % flight arcs can end at one node)  
+            idx_depart     =  strcmp(timespace(k).fl.ORG, a(j));
+            idx_arrive     =  strcmp(timespace(k).fl.DEST, a(j)) ; 
+                      
             % nodes at one airport j ordered in chronological time 
             %( duplicate nodes removed)
             node_j_time    = unique(cell2mat(sortrows([...
-                    table2cell(timespace(k).fl(idx(:,1),4)); ...
-                 table2cell( timespace(k).fl(idx(:,2),5))],1)),'sorted'); 
+                    table2cell(timespace(k).fl(idx_depart,4)); ...
+                 table2cell( timespace(k).fl(idx_arrive,5))],1)),'sorted'); 
 
             % generate cell array of nodes at airport j with 
             % airport IATA code
@@ -148,6 +147,17 @@ function [AC,B,timespace] = read_schedule(filename)
     disp(size(timespace(1).ga,1))
     disp('Number of overnight arcs for A330: ') 
     disp(size(timespace(1).nga,1))
+    %% determine an appropriate count 
+    count_time = zeros(1,K);
+    for k = 1:K
+        if sum(cell2mat(timespace(k).node(:,2))== 0) == 0
+            count_time(k) = 0;
+        else
+            if sum(cell2mat(timespace(k).node(:,2))== 1439) == 0
+                count_time(k) = 1439;
+            end
+        end
+    end
 end
 
 %% ------------- END OF CODE ----------------------------------------------

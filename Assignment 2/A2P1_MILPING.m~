@@ -14,12 +14,13 @@ input      =  'Assignment2.xlsx';
 %         'R1', 'R2', 'R3', 'C1', 'C2',];
 
 % Inputs
-[P, R, L, fare, fare_r, demand, col, delta, Q, farecost, Bpr, ... 
+%[P, R, L, fare, fare_r, demand, col, delta, Q, farecost, Bpr, ... 
           recap_p, recap_r, recaprate] = setup2P1(input);
 tic
 [AC,B,timespace,count_time] = read_schedule(input);
+timespace(1).fl = 
 time_start = toc; % after the time space network
-find(timespace(1).fl.Departure > timespace(1).fl.Arrival);
+
 % More variables
 K  = size(AC,1);                % set of AIRCRAFT types
 Lf = size(timespace(1).fl,1);   % set of aircraft flights (not going by bus)
@@ -190,10 +191,9 @@ time_pre = toc;
            for a = G+1:(G+NGA) %set of overnight ground arcs
                C5(Yindex(k,a,timespace)) = 1; 
            end
-           [idx_fls,no] = cl_k(timespace,k);
-           for i = 1:no
-               C5(Findex(k,idx_fls(i))) = 1;
-           end
+%            for i = 1:5
+%                C5(Findex(k,i)) = 1;
+%            end
            IFAM.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',k));
            MILP.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',k));
         end
