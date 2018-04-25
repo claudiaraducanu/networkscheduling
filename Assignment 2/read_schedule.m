@@ -21,8 +21,8 @@ function [AC,B,timespace] = read_schedule(filename)
 % April 2018;
 % Assignment 2, Network Scheduling
 
-%    clearvars
-%    filename = 'Assignment2.xlsx';
+     clearvars
+     filename = 'Assignment2.xlsx';
 
 %% ------------- BEGIN CODE -----------------------------------------------
 %% Input 
@@ -76,6 +76,8 @@ function [AC,B,timespace] = read_schedule(filename)
         timespace(k).fl         = [schedule(:,1:5) schedule(:,5+k)]; 
         % the flight arc ends at the turn around time
         timespace(k).fl.Arrival = timespace(k).fl.Arrival + AC.TAT(k); 
+        idx = find(timespace(k).fl.Arrival >= 1440);
+        timespace(k).fl.Arrival(idx) = timespace(k).fl.Arrival(idx) - 1440; 
         timespace(k).fl.Properties.VariableNames{end} = 'Cost'; 
     end
     
