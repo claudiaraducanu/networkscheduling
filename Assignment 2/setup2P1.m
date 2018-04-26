@@ -1,5 +1,5 @@
 function [P, R, L, fare, fare_r, demand, col, delta, Q, farecost, Bpr, ... 
-         recap_p, recap_r, recaprate] = setup2P1(filename)  
+         recap_p, recap_r, recaprate, flightnrs] = setup2P1(filename)  
 
 % This file contains the function to read most of the input file and some
 % initial calculation. 

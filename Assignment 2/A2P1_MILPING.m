@@ -12,7 +12,7 @@ input      =  'Assignment2.xlsx';
 
 % Inputs
 [P, R, L, fare, fare_r, demand, col, delta, Q, farecost, Bpr, ... 
-          recap_p, recap_r, recaprate] = setup2P1(input);
+          recap_p, recap_r, recaprate,flightnrs] = setup2P1(input);
 tic
 [AC,B,timespace,count_time] = read_schedule(input);
 time_start = toc; % after the time space network
@@ -33,10 +33,10 @@ Gk = sum(GA);
 % Loop stoppers
 not_opt_col = 1;
 not_opt_row = 1;
-colz = [];
-rowz = [];
-coliez = [];
-rowiez = [];
+colz = []; % list of added columns
+rowz = []; % list of added rows
+coliez = []; % list of the amount of added columns
+rowiez = []; % list of the amount of added rows
 
 %% The costs
 %%
@@ -426,13 +426,13 @@ for p = 1:P
         end
     end
 end 
-rowiez = [rowiez; size(rowz)];
+rowiez = [rowiez; size(rowz)]; 
 
-MILP.solve();
+MILP.solve(); % Final solving
 MILP.writeModel([model2 '.lp']);
 
+% Make lists of solution, so it is easy to print
 OV = [OV;MILP.Solution.objval];
-
 Final = size(B,1)*4500 + MILP.Solution.objval ;
 OV_Final = OV + size(B,1)*4500;
 disp(Final)
@@ -447,6 +447,7 @@ time_final = toc;
         solution(k).groundarc          = MILP.Solution.x(ga_k(k)+1:ga_k(k+1)); %#ok<SAGROW>
         solution(k).overnight          = solution(k).groundarc(end-size(timespace(k).nga,1)+1:end);
         ac_verif(k)                    = sum(solution(k).overnight);
+        [idx_fls,no] = cl_k(timespace,k);
     end
 
     n  = Gk;
@@ -459,8 +460,6 @@ time_final = toc;
     
 time_end = toc;
 
-times = [time_start;time_pre;time_initial;time_loops;time_final;time_end];
-
     %% Export to .txt
     % Flights operated by B737-700
     writetable(solution(3).fl,'B737.txt','Delimiter',' ')  
@@ -469,30 +468,40 @@ times = [time_start;time_pre;time_initial;time_loops;time_final;time_end];
     
 %% Post Processing
 %%
+% Spilage computation
 spilled_it = [];%int64( find(MILP.Solution.x(Gk+Lf*4+1:Gk+Lf*4+737)) );
 spilled_am = [];
-for spill = 1:737
-    if int64(MILP.Solution.x(Gk+Lf*4+spill)) ~= 0
-        spilled_am = [spilled_am; MILP.Solution.x(Gk+Lf*4+spill)];
-        spilled_it = [spilled_it; spill];
+for spill = 1:79
+    if int64(MILP.Solution.x(Gk+Lf*4+737+spill)) ~= 0
+        spilled_am = [spilled_am; MILP.Solution.x(Gk+Lf*4+737+spill)];
+        spilled_it = [spilled_it; colz(spill,:)];
     end
 end
-spillage = [spilled_it, spilled_am];
-spillage = array2table(spillage,'VariableNames',{'Itinerary','Pax'});
+spilled_it = spilled_it-1; % as the itineraries in given info start from 0
+spillage = sortrows([spilled_it, spilled_am]); % sort on itinerary p
+spillage = [spillage(1:11,1),spillage(1:11,2),spillage(1:11,3),... % set it in different columns for the report
+    spillage(12:22,1),spillage(12:22,2),spillage(12:22,3),...
+    spillage(23:33,1),spillage(23:33,2),spillage(23:33,3)];
+spillage = array2table(spillage,'VariableNames',...
+   {'ItineraryP','ItineraryR','Pax','Itineray','Itinerayr','Pa','Itinera','Itinerayrr','Paxt'}); % make it a table
+writetable(spillage,'spillage.txt','Delimiter',' ')  % write the table
 
-spilled_tot = sum(MILP.Solution.x(Gk+Lf*4+1:Gk+Lf*4+737));
+spilled_tot = sum(MILP.Solution.x(Gk+Lf*4+737+1:Gk+Lf*4+737+79)); % total amount of spilled passengers
 
-times = [time_start;time_pre;time_initial;time_loops;time_final;time_end];
+
+% Time computation
+theend = toc;
+times = [time_start;time_pre;time_initial;time_loops;time_final;time_end;theend];
 
 
 %% Evolution of the Cost
 % The Plot
-xlabels = {"Initial", "C1", "C2", "C3", "R1", "R2", "R3", "R4", "R5",...
-        "R6", "R7", "R8", "R9", "R10", "R11", "C1", "C2", "C3",...
-        "R1", "R2", "C1", "C2", "R1", "MILP", "MILP"};
-xlabels1 = ["Initial"; "C1"; "C2"; "C3"; "R1"; "R2"; "R3"; "R4"; "R5";...
-        "R6"; "R7"; "R8"; "R9"; "R10"; "R11"; "C1"; "C2"; "C3";...
-        "R1"; "R2"; "C1"; "C2"; "R1"; "MILP"; "MILP"];
+% xlabels = {"Initial", "C1", "C2", "C3", "R1", "R2", "R3", "R4", "R5",...
+%         "R6", "R7", "R8", "R9", "R10", "R11", "C1", "C2", "C3",...
+%         "R1", "R2", "C1", "C2", "R1", "MILP", "MILP"};
+% xlabels1 = ["Initial"; "C1"; "C2"; "C3"; "R1"; "R2"; "R3"; "R4"; "R5";...
+%         "R6"; "R7"; "R8"; "R9"; "R10"; "R11"; "C1"; "C2"; "C3";...
+%         "R1"; "R2"; "C1"; "C2"; "R1"; "MILP"; "MILP"];
 % x_values = 1:25;
 % plot(OV_Final)
 % xlabel('Iterations')
@@ -508,8 +517,20 @@ xlabels1 = ["Initial"; "C1"; "C2"; "C3"; "R1"; "R2"; "R3"; "R4"; "R5";...
 % set(gca,'Xtick',x_values,'XTickLabel',xlabels);
 
 % The Table
-costtable = [xlabels1, OV_Final];
+%costtable = [xlabels1, OV_Final];
 
+
+% %% B737 spilled flights
+% 
+% for pa = spilled_it
+%     hoola = find(delta{pa+1,1}(:));
+%     for fli = 1:57
+%         if isequal(flightnrs(hoola),solution(3).fl(fli,1))
+%             sp = [sp; solution(3).fl(fli,1)] % list of spillage flights for B737
+%             it_sp = [it_sp; pa] % list of itineraries that B737 flies, with spillage
+%         end
+%     end
+% end
 
 
 
