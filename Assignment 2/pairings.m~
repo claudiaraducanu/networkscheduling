@@ -30,11 +30,12 @@ for s = 1:size(flight.fl.ORG,1)
     if max_start >= 1440
         max_start = max_start - 1440;
     end
-    if min_start >= 1440
-        min_start = min_start - 1440;
-    end  
+    if max_start >= 1440
+        max_start = max_start - 1440;
+        req_3 = double(min_start  ?= flight.fl.Departure );
+    end
     req_3 = double(min_start  <= flight.fl.Departure );
-    req_4 = double(max_start  >= flight.fl.Departure );
+    req_4 = double(max_start  >= flight.fl.Departure );    
     % combine requirements 1 and 4 to determine next possible flights
     next  = flight.fl(req_1 + req_3 +req_4 == 3,:);
     if size(next,1) == 1 
@@ -43,9 +44,6 @@ for s = 1:size(flight.fl.ORG,1)
         ss       = cell(size(next,1),1);
         ss(:)    = S.Flight;
         pairs{s,1} = [ss next.Flight];
-    end
-    if size(next,1) == 0 && strcmp(S.DEST,'AEP')==1
-        pairs{s,1} = 'remove';
     end
 end
 
