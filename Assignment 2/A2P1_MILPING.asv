@@ -9,16 +9,14 @@ clearvars
 %%
 input      =  'Assignment2.xlsx';
 
-xlabel = ['Initial', 'C1', 'C2', 'C3']
 
 % Inputs
 [P, R, L, fare, fare_r, demand, col, delta, Q, farecost, Bpr, ... 
           recap_p, recap_r, recaprate] = setup2P1(input);
 tic
-[AC,B,timespace] = read_schedule(input);
-
+[AC,B,timespace,count_time] = read_schedule(input);
 time_start = toc; % after the time space network
-
+find(timespace(1).fl.Departure > timespace(1).fl.Arrival);
 % More variables
 K  = size(AC,1);                % set of AIRCRAFT types
 Lf = size(timespace(1).fl,1);   % set of aircraft flights (not going by bus)
@@ -189,6 +187,10 @@ time_pre = toc;
            for a = G+1:(G+NGA) %set of overnight ground arcs
                C5(Yindex(k,a,timespace)) = 1; 
            end
+           [idx_fls,no] = cl_k(timespace,k);
+           for i = 1:no
+               C5(Findex(k,idx_fls(i))) = 1;
+           end
            IFAM.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',k));
            MILP.addRows(0, C5, AC.Units(k), sprintf('Fleetsize_%d',k));
         end
@@ -230,6 +232,7 @@ iter=0;
    %% Iterations
    %%
    iter = iter +1;
+   no_it(titer,1) = iter;
     disp('-------------------------------------------------');
     disp(['Column iteration: ',num2str(iter)]);   
     disp('-------------------------------------------------');
@@ -317,16 +320,16 @@ iter=0;
     dual = IFAM.Solution.dual;
     pi   = dual(1:L);                 % dual variables of capacity constraints (slack)
     sigma = zeros(P,1);
-    if size(dual) > L
+    if size(dual) > constraints
         for ro = 1:numel(rowz)
-            sigma(rowz(ro))  = dual(L+ro);
+            sigma(rowz(ro)) = dual(constraints+ro);
         end
     end
-
     
     
     if checkcol == 0
         not_opt_col = 0;
+        
     else 
         not_opt_col = 1;
         not_opt_row = 1;       
@@ -342,7 +345,7 @@ iter=0;
    while not_opt_row == 1
   %%  Initiate CPLEX model
   iteration = iteration +1;
-
+  no_it(titer,2) = iteration;
     disp('-------------------------------------------------');
     disp(['Row iteration: ',num2str(iteration)]);   
     disp('-------------------------------------------------');
@@ -477,6 +480,19 @@ spilled_tot = sum(MILP.Solution.x(Gk+Lf*4+1:Gk+Lf*4+737));
 
 
 times = [time_start;time_pre;time_initial;time_loops;time_final;time_end];
+
+xlabels = {"Initial", "C1", "C2", "C3", "R1", "R2", "R3", "R4", "R5",...
+        "R6", "R7", "R8", "R9", "R10", "R11", "C1", "C2", "C3",...
+        "R1", "R2", "C1", "C2", "R1", "MILP", "MILP"};
+x_values = 1:25;
+plot(OV_Final)
+xlabel('Iterations)
+ylabel('Final cost [$]')
+line('XData', [1.5 1.5], 'YData', [2650000 2740000], 'LineStyle', '-', ...
+    'LineWidth', 2, 'Color','m')
+set(gca,'Xtick',x_values,'XTickLabel',xlabels);
+
+
 
 
 %% Index Functions

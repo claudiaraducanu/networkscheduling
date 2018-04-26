@@ -1,6 +1,6 @@
 %%  Initialization
 % Claudia Raducanu and Luka Van de Sype
-%addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
+addpath('C:\Program Files\IBM\ILOG\CPLEX_Studio1271\cplex\matlab\x64_win64'); %Luka
 % clc
 clearvars
 % clear all
@@ -9,9 +9,6 @@ clearvars
 %%
 input      =  'Assignment2.xlsx';
 
-% xlabel = ['Initial', 'C1', 'C2', 'C3', 'R1', 'R2', 'R3', 'R4', 'R5',...
-%         'R6','R7', 'R8', 'R9', 'R10', 'R11', 'C1', 'C2', 'C3',...
-%         'R1', 'R2', 'R3', 'C1', 'C2',];
 
 % Inputs
 [P, R, L, fare, fare_r, demand, col, delta, Q, farecost, Bpr, ... 
@@ -38,6 +35,8 @@ not_opt_col = 1;
 not_opt_row = 1;
 colz = [];
 rowz = [];
+coliez = [];
+rowiez = [];
 
 %% The costs
 %%
@@ -222,10 +221,7 @@ while not_opt_col == 1 || not_opt_row == 1
     disp('-------------------------------------------------');
     
     dual    = IFAM.Solution.dual;
-    rowiez = size(rowz);
-    coliez = size(colz);
-    disp(rowiez)
-    disp(coliez)
+
     
     
 %% COLUMN GENERATION
@@ -235,6 +231,7 @@ iter=0;
    %% Iterations
    %%
    iter = iter +1;
+   no_it(titer,1) = iter;
     disp('-------------------------------------------------');
     disp(['Column iteration: ',num2str(iter)]);   
     disp('-------------------------------------------------');
@@ -331,6 +328,7 @@ iter=0;
     
     if checkcol == 0
         not_opt_col = 0;
+        
     else 
         not_opt_col = 1;
         not_opt_row = 1;       
@@ -346,7 +344,7 @@ iter=0;
    while not_opt_row == 1
   %%  Initiate CPLEX model
   iteration = iteration +1;
-
+  no_it(titer,2) = iteration;
     disp('-------------------------------------------------');
     disp(['Row iteration: ',num2str(iteration)]);   
     disp('-------------------------------------------------');
@@ -396,6 +394,10 @@ iter=0;
         
    end
     
+    rowiez = [rowiez; size(rowz)];
+    coliez = [coliez; size(colz)];
+    disp(rowiez)
+    disp(coliez)
 end
 time_loops = toc;
 
@@ -424,7 +426,8 @@ for p = 1:P
         end
     end
 end 
-    
+rowiez = [rowiez; size(rowz)];
+
 MILP.solve();
 MILP.writeModel([model2 '.lp']);
 
@@ -479,8 +482,36 @@ spillage = array2table(spillage,'VariableNames',{'Itinerary','Pax'});
 
 spilled_tot = sum(MILP.Solution.x(Gk+Lf*4+1:Gk+Lf*4+737));
 
-
 times = [time_start;time_pre;time_initial;time_loops;time_final;time_end];
+
+
+%% Evolution of the Cost
+% The Plot
+xlabels = {"Initial", "C1", "C2", "C3", "R1", "R2", "R3", "R4", "R5",...
+        "R6", "R7", "R8", "R9", "R10", "R11", "C1", "C2", "C3",...
+        "R1", "R2", "C1", "C2", "R1", "MILP", "MILP"};
+xlabels1 = ["Initial"; "C1"; "C2"; "C3"; "R1"; "R2"; "R3"; "R4"; "R5";...
+        "R6"; "R7"; "R8"; "R9"; "R10"; "R11"; "C1"; "C2"; "C3";...
+        "R1"; "R2"; "C1"; "C2"; "R1"; "MILP"; "MILP"];
+% x_values = 1:25;
+% plot(OV_Final)
+% xlabel('Iterations')
+% ylabel('Final cost [$]')
+% line('XData', [1 1], 'YData', [2650000 2740000], 'LineStyle', '-', ...
+%     'LineWidth', 1, 'Color','k')
+% line('XData', [15 15], 'YData', [2650000 2740000], 'LineStyle', '-', ...
+%     'LineWidth', 1, 'Color','k')
+% line('XData', [20 20], 'YData', [2650000 2740000], 'LineStyle', '-', ...
+%     'LineWidth', 1, 'Color','k')
+% line('XData', [23 23], 'YData', [2650000 2740000], 'LineStyle', '-', ...
+%     'LineWidth', 1, 'Color','k')
+% set(gca,'Xtick',x_values,'XTickLabel',xlabels);
+
+% The Table
+costtable = [xlabels1, OV_Final];
+
+
+
 
 
 %% Index Functions
